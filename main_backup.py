@@ -101,9 +101,7 @@ class GridWorld:
 class QLearningAgent:
     """Q-Learning Agent that learns optimal policies through experience."""
 
-    def __init__(
-        self, states, actions, alpha=0.1, gamma=0.9, epsilon=1.0, epsilon_decay=0.99999
-    ):
+    def __init__(self, states, actions, alpha=0.1, gamma=0.9, epsilon=1.0):
         """Initialize the Q-Learning agent with hyperparameters."""
         self.states = states
         self.actions = actions
@@ -111,7 +109,7 @@ class QLearningAgent:
         self.gamma = gamma
         self.epsilon = epsilon
         self.epsilon_min = 0.01
-        self.epsilon_decay = epsilon_decay
+        self.epsilon_decay = 0.99999
         self.q_table = {
             state: {action: 0.0 for action in self.actions} for state in self.states
         }
@@ -334,18 +332,17 @@ def plot_convergence_bars(ax, convergence_data, param_key, param_name, title_suf
     ax.grid(True, alpha=0.3)
 
 
-def analyze_hyperparameters(
-    episodes, penalty, alpha_values, gamma_values, epsilon_decay_values
-):
+def analyze_hyperparameters():
     """Trains agents with different hyperparameters and plots comprehensive convergence results."""
-    env = GridWorld(penalty=penalty)
+    episodes = 100
+    env = GridWorld(penalty=-1.0)
 
     # --- Learning Rate (alpha) Analysis ---
     fig, ((ax1, ax2), (ax3, ax4), (ax5, ax6)) = plt.subplots(3, 2, figsize=(15, 18))
 
     print("Analyzing Learning Rate (alpha) effects...")
     alpha_results = {}
-    for alpha in alpha_values:
+    for alpha in [0.01, 0.1, 0.5, 0.9]:
         print(f"  Training with alpha = {alpha}...")
         agent = QLearningAgent(env.get_states(), env.action_names, alpha=alpha)
         q_changes, policy_changes = run_training(env, agent, episodes)
@@ -376,7 +373,7 @@ def analyze_hyperparameters(
     # --- Discount Factor (gamma) Analysis ---
     print("\nAnalyzing Discount Factor (gamma) effects...")
     gamma_results = {}
-    for gamma in gamma_values:
+    for gamma in [0.5, 0.9, 0.99]:
         print(f"  Training with gamma = {gamma}...")
         agent = QLearningAgent(env.get_states(), env.action_names, gamma=gamma)
         q_changes, policy_changes = run_training(env, agent, episodes)
@@ -404,38 +401,32 @@ def analyze_hyperparameters(
     ax4.legend()
     ax4.grid(True)
 
-    # --- Epsilon Decay Analysis ---
-    print("\nAnalyzing Epsilon Decay effects...")
-    epsilon_decay_results = {}
-    for epsilon_decay in epsilon_decay_values:
-        print(f"  Training with epsilon_decay = {epsilon_decay}...")
-        agent = QLearningAgent(
-            env.get_states(), env.action_names, epsilon_decay=epsilon_decay
-        )
+    # --- Epsilon Analysis ---
+    print("\nAnalyzing Epsilon effects...")
+    epsilon_results = {}
+    for epsilon in [0.1, 0.3, 0.7, 1.0]:
+        print(f"  Training with epsilon = {epsilon}...")
+        agent = QLearningAgent(env.get_states(), env.action_names, epsilon=epsilon)
         q_changes, policy_changes = run_training(env, agent, episodes)
-        epsilon_decay_results[epsilon_decay] = {
+        epsilon_results[epsilon] = {
             "q_changes": q_changes,
             "policy_changes": policy_changes,
             "final_policy": agent.get_policy(),
         }
 
         # Plot Q-value convergence
-        ax5.plot(q_changes, label=f"epsilon_decay = {epsilon_decay}", alpha=0.8)
+        ax5.plot(q_changes, label=f"epsilon = {epsilon}", alpha=0.8)
         # Plot cumulative policy changes
-        ax6.plot(
-            np.cumsum(policy_changes),
-            label=f"epsilon_decay = {epsilon_decay}",
-            alpha=0.8,
-        )
+        ax6.plot(np.cumsum(policy_changes), label=f"epsilon = {epsilon}", alpha=0.8)
 
-    ax5.set_title("Q-Value Convergence: Epsilon Decay")
+    ax5.set_title("Q-Value Convergence: Epsilon")
     ax5.set_xlabel("Episode")
     ax5.set_ylabel("Total Q-Value Change per Episode")
     ax5.legend()
     ax5.grid(True)
     ax5.set_yscale("log")
 
-    ax6.set_title("Policy Convergence: Epsilon Decay")
+    ax6.set_title("Policy Convergence: Epsilon")
     ax6.set_xlabel("Episode")
     ax6.set_ylabel("Cumulative Policy Changes")
     ax6.legend()
@@ -445,10 +436,10 @@ def analyze_hyperparameters(
     plt.show()
 
     # --- Convergence Speed Analysis ---
-    analyze_convergence_speed(alpha_results, gamma_results, epsilon_decay_results)
+    analyze_convergence_speed(alpha_results, gamma_results, epsilon_results)
 
 
-def analyze_convergence_speed(alpha_results, gamma_results, epsilon_decay_results):
+def analyze_convergence_speed(alpha_results, gamma_results, epsilon_results):
     """Analyze and visualize convergence speed metrics for different hyperparameters."""
     print("\n" + "=" * 60)
     print("CONVERGENCE SPEED ANALYSIS")
@@ -470,19 +461,17 @@ def analyze_convergence_speed(alpha_results, gamma_results, epsilon_decay_result
         metrics["gamma"] = gamma
         gamma_convergence_data.append(metrics)
 
-    # Calculate convergence metrics for epsilon decay values
-    epsilon_decay_convergence_data = []
-    for epsilon_decay, results in epsilon_decay_results.items():
+    # Calculate convergence metrics for epsilon values
+    epsilon_convergence_data = []
+    for epsilon, results in epsilon_results.items():
         metrics = calculate_convergence_metrics(results)
-        metrics["epsilon_decay"] = epsilon_decay
-        epsilon_decay_convergence_data.append(metrics)
+        metrics["epsilon"] = epsilon
+        epsilon_convergence_data.append(metrics)
 
     # Plot smoothed convergence curves
     plot_smoothed_convergence(ax1, alpha_results, "alpha", "Learning Rate")
     plot_smoothed_convergence(ax2, gamma_results, "gamma", "Discount Factor")
-    plot_smoothed_convergence(
-        ax3, epsilon_decay_results, "epsilon_decay", "Epsilon Decay"
-    )
+    plot_smoothed_convergence(ax3, epsilon_results, "epsilon", "Epsilon")
 
     # Plot convergence comparison bar charts
     plot_convergence_bars(
@@ -496,11 +485,7 @@ def analyze_convergence_speed(alpha_results, gamma_results, epsilon_decay_result
         "Discount Factor",
     )
     plot_convergence_bars(
-        ax6,
-        epsilon_decay_convergence_data,
-        "epsilon_decay",
-        "Epsilon Decay",
-        "Epsilon Decay",
+        ax6, epsilon_convergence_data, "epsilon", "Epsilon", "Epsilon"
     )
 
     plt.tight_layout()
@@ -508,18 +493,15 @@ def analyze_convergence_speed(alpha_results, gamma_results, epsilon_decay_result
 
     # Print convergence summary
     print_convergence_summary(
-        alpha_convergence_data,
-        gamma_convergence_data,
-        epsilon_decay_convergence_data,
-        100,
-        25,
+        alpha_convergence_data, gamma_convergence_data, epsilon_convergence_data
     )
 
 
-def print_convergence_summary(
-    alpha_data, gamma_data, epsilon_decay_data, max_episodes, fast_convergence_threshold
-):
+def print_convergence_summary(alpha_data, gamma_data, epsilon_data):
     """Print a detailed summary of convergence analysis results."""
+    # Constants
+    max_episodes = 100
+    fast_convergence_threshold = 25  # Adjusted for 100 episodes
 
     print("\nCONVERGENCE ANALYSIS SUMMARY:")
     print("-" * 50)
@@ -558,12 +540,12 @@ def print_convergence_summary(
             f"{data['gamma']:<6} {q_conv!s:<15} {data['total_policy_changes']:<15} {quality:<20}"
         )
 
-    print("\nEpsilon Decay Analysis:")
+    print("\nEpsilon Analysis:")
     print(
-        f"{'eps_decay':<10} {'Q-Conv Episode':<15} {'Policy Changes':<15} {'Convergence Quality':<20}"
+        f"{'epsilon':<8} {'Q-Conv Episode':<15} {'Policy Changes':<15} {'Convergence Quality':<20}"
     )
     print("-" * 70)
-    for data in epsilon_decay_data:
+    for data in epsilon_data:
         q_conv = data["q_convergence"] if data["q_convergence"] else f">{max_episodes}"
         if data["q_convergence"] and data["q_convergence"] < fast_convergence_threshold:
             quality = "Fast"
@@ -572,7 +554,7 @@ def print_convergence_summary(
         else:
             quality = "No Convergence"
         print(
-            f"{data['epsilon_decay']:<10} {q_conv!s:<15} {data['total_policy_changes']:<15} {quality:<20}"
+            f"{data['epsilon']:<8} {q_conv!s:<15} {data['total_policy_changes']:<15} {quality:<20}"
         )
 
     # Find best parameters
@@ -584,8 +566,8 @@ def print_convergence_summary(
         gamma_data,
         key=lambda x: x["q_convergence"] if x["q_convergence"] else float("inf"),
     )
-    best_epsilon_decay = min(
-        epsilon_decay_data,
+    best_epsilon = min(
+        epsilon_data,
         key=lambda x: x["q_convergence"] if x["q_convergence"] else float("inf"),
     )
 
@@ -597,7 +579,7 @@ def print_convergence_summary(
         f"Best Discount Factor (gamma): {best_gamma['gamma']} (converged at episode {best_gamma['q_convergence']})"
     )
     print(
-        f"Best Epsilon Decay: {best_epsilon_decay['epsilon_decay']} (converged at episode {best_epsilon_decay['q_convergence']})"
+        f"Best Epsilon: {best_epsilon['epsilon']} (converged at episode {best_epsilon['q_convergence']})"
     )
     print(
         "\nNote: 'Best' is defined as fastest Q-value convergence to threshold of 0.001"
@@ -605,40 +587,13 @@ def print_convergence_summary(
 
 
 if __name__ == "__main__":
-    # ===============================
-    # CONFIGURATION PARAMETERS
-    # ===============================
-
-    # Training Configuration
     EPISODES = 100
-    BASE_PENALTY = -1.0
-    HIGH_PENALTY = -200.0
-
-    # Hyperparameter Tuning Configuration
-    ALPHA_VALUES = [0.01, 0.1, 0.5, 0.9]  # Learning rates to test
-    GAMMA_VALUES = [0.5, 0.9, 0.99]  # Discount factors to test
-    EPSILON_DECAY_VALUES = [
-        0.001,
-        0.99,
-        0.995,
-        0.999,
-        0.99999,
-    ]  # Epsilon decay rates to test
-
-    # Analysis Configuration
-    FAST_CONVERGENCE_THRESHOLD = 25  # Episodes threshold for "fast" convergence
-    Q_CONVERGENCE_THRESHOLD = 0.001  # Q-value change threshold for convergence
-    POLICY_STABILITY_WINDOW = 10  # Episodes window for policy stability check
-
-    # ===============================
-    # MAIN EXECUTION
-    # ===============================
 
     # --- Part 1 & 2: Base Case and Convergence Analysis ---
     print("=" * 60)
-    print(f"RUNNING BASE CASE (Penalty={BASE_PENALTY}) & CONVERGENCE ANALYSIS")
+    print("RUNNING BASE CASE (Penalty=-1) & CONVERGENCE ANALYSIS")
     print("=" * 60)
-    env_base = GridWorld(penalty=BASE_PENALTY)
+    env_base = GridWorld(penalty=-1.0)
     agent_base = QLearningAgent(env_base.get_states(), env_base.action_names)
 
     q_changes, p_changes = run_training(env_base, agent_base, EPISODES)
@@ -648,9 +603,9 @@ if __name__ == "__main__":
 
     # --- Part 3: High Penalty Analysis ---
     print("\n" + "=" * 60)
-    print(f"RUNNING HIGH PENALTY CASE (Penalty={HIGH_PENALTY})")
+    print("RUNNING HIGH PENALTY CASE (Penalty=-200)")
     print("=" * 60)
-    env_high_penalty = GridWorld(penalty=HIGH_PENALTY)
+    env_high_penalty = GridWorld(penalty=-200.0)
     agent_high_penalty = QLearningAgent(
         env_high_penalty.get_states(),
         env_high_penalty.action_names,
@@ -663,10 +618,5 @@ if __name__ == "__main__":
     # --- Hyperparameter analysis ---
     print("\n" + "=" * 60)
     print("RUNNING HYPERPARAMETER ANALYSIS")
-    print(f"Testing Alpha values: {ALPHA_VALUES}")
-    print(f"Testing Gamma values: {GAMMA_VALUES}")
-    print(f"Testing Epsilon Decay values: {EPSILON_DECAY_VALUES}")
     print("=" * 60)
-    analyze_hyperparameters(
-        EPISODES, BASE_PENALTY, ALPHA_VALUES, GAMMA_VALUES, EPSILON_DECAY_VALUES
-    )
+    analyze_hyperparameters()

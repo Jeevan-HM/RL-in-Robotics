@@ -22,15 +22,13 @@
     linkcolor=blue,
     filecolor=magenta,      
     urlcolor=blue,
-    pdftitle={Q-Learning Gridworld Report},
-    pdfauthor={Jeevan Hebbal Manjunath},
 }
 
 %===============================================================================
 % TITLE
 %===============================================================================
 \title{\textbf{Teaching an Agent to Navigate a Risky World: \\ A Q-Learning Adventure}}
-\author{Jeevan Hebbal Manjunath}
+\author{\Large\textbf{Team 01}  \\Jeevan Hebbal Manjunath, Varun Karthik, Yeshwanth Rddy Gurreddy}
 \date{\today}
 
 %===============================================================================
@@ -103,6 +101,89 @@ For a large number of episodes:
 %===============================================================================
 The Q-learning agent successfully learned to navigate the gridworld. Analyzing its learning process and final strategies reveals key insights into how the algorithm operates and adapts.
 
+\subsection{The Crucial Role of Hyperparameters}
+The agent's learning effectiveness is highly dependent on tuning its core hyperparameters ($\alpha, \gamma, \epsilon$). Figure~\ref{fig:hyperparameter_summary} provides a high-level conceptual overview of their effects.
+
+\begin{itemize}
+    \item \textbf{Learning Rate ($\alpha$):} Controls how \textbf{impressionable} the agent is. A high $\alpha$ leads to faster learning but can be unstable, while a low $\alpha$ is stable but slow.
+    
+    \item \textbf{Discount Factor ($\gamma$):} Controls how \textbf{farsighted} the agent is. A high $\gamma$ is essential for prioritizing long-term rewards like the `+1` prize over short-term penalties.
+    
+    \item \textbf{Exploration Schedule ($\epsilon$ decay):} A \textbf{decaying schedule} is best. The agent starts with high randomness to explore, then gradually reduces it to exploit the optimal path it has found.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/hyperparameter_effects_summary.png}
+    \caption{Conceptual overview of hyperparameter effects on Q-learning performance. Learning rate ($\alpha$) controls update speed, discount factor ($\gamma$) determines farsightedness, and $\epsilon$ decay balances exploration vs exploitation.}\label{fig:hyperparameter_summary}
+\end{figure}
+
+A more detailed, data-driven analysis is presented in the following figures. This comprehensive plot reveals several key trade-offs:
+\begin{itemize}
+    \item Figure~\ref{fig:hyperparameter_alpha} demonstrates the critical balance between learning speed 
+    and stability in the learning rate parameter. Low values ($\alpha < 0.1$) lead to slow, overly 
+    conservative learning that may not converge within reasonable time frames. High values 
+    ($\alpha > 0.5$) cause erratic, unstable performance where new experiences override 
+    previous learning too aggressively. The optimal range ($\alpha \approx 0.1-0.3$) achieves 
+    rapid initial learning followed by stable convergence.
+    \item Figure~\ref{fig:hyperparameter_gamma} reveals the profound impact of the discount 
+    factor on the agent's planning horizon. Low discount factors ($\gamma < 0.7$) create myopic 
+    behavior where the agent only considers immediate rewards, leading to suboptimal policies 
+    that get trapped in local maxima. High discount factors ($\gamma \geq 0.9$) enable true 
+    long-term planning, allowing the agent to endure short-term penalties (like the -0.04 
+    living cost) in pursuit of the larger +1 goal reward.
+    \item Figure~\ref{fig:hyperparameter_epsilon} examines the crucial exploration-exploitation 
+    trade-off through different $\epsilon$ decay strategies. Fast decay rates (e.g., 0.99) cause 
+    premature exploitation where the agent commits to the first reasonable path it finds, 
+    potentially missing better alternatives. Slow decay rates (e.g., 0.9999) maintain 
+    exploration too long, wasting episodes on random actions after the optimal policy has 
+    been discovered. Moderate decay rates (e.g., 0.999) strike the optimal balance, providing 
+    sufficient early exploration followed by timely exploitation of learned knowledge.
+    \item Figure~\ref{fig:hyperparameter_heatmap} provides a comprehensive performance landscape across $\alpha$-$\gamma$ combinations, revealing critical interaction effects between these parameters. The heatmap clearly shows that high performance requires both sufficient long-term planning ($\gamma > 0.8$) and appropriate learning speed ($\alpha \in [0.1, 0.4]$). The distinct "performance cliff" at low $\gamma$ values demonstrates that no amount of learning rate optimization can compensate for insufficient farsightedness. Conversely, the optimal $\gamma$ region shows robustness to $\alpha$ variations, indicating that long-term planning is the dominant factor.
+    \item Figure~\ref{fig:hyperparameter_efficiency} demonstrates learning efficiency by tracking episode length over time, revealing how quickly different learning rates enable the agent to discover optimal paths. Higher learning rates initially show faster improvement (shorter episodes sooner) but suffer from instability in later stages. Lower learning rates show steady, reliable improvement but require more episodes to reach optimal performance. The figure illustrates the fundamental trade-off between learning speed and stability that characterizes the learning rate parameter.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/hyperparameter_analysis_alpha.png}
+    \caption{Learning rate ($\alpha$) analysis showing that moderate values (0.1-0.3) achieve optimal balance between convergence speed and stability. High values cause instability while low values learn too slowly.}\label{fig:hyperparameter_alpha}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/hyperparameter_analysis_gamma.png}
+    \caption{Discount factor ($\gamma$) analysis showing that high values ($\gamma \geq 0.9$) are essential for optimal performance. Low values cause myopic behavior that prioritizes immediate rewards over the distant goal.}\label{fig:hyperparameter_gamma}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/hyperparameter_analysis_epsilon_decay.png}
+    \caption{Exploration schedule ($\epsilon$ decay) analysis revealing that moderate decay rates (0.999) optimally balance exploration and exploitation. Fast decay leads to premature convergence, slow decay wastes episodes on random actions.}\label{fig:hyperparameter_epsilon}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/hyperparameter_heatmap.png}
+    \caption{Performance heatmap showing optimal combinations require high $\gamma$ (long-term planning) and moderate $\alpha$ (stable learning). The sharp performance drop at low $\gamma$ demonstrates its critical importance.}\label{fig:hyperparameter_heatmap}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/hyperparameter_efficiency.png}
+    \caption{Learning efficiency showing episode length evolution. Higher learning rates achieve rapid initial improvement but remain volatile, while moderate rates provide steady convergence to optimal path lengths.}\label{fig:hyperparameter_efficiency}
+\end{figure}
+
+\subsection{Understanding Convergence: Policy vs. Q-Values}
+An important observation is that the agent's \textbf{policy converges much earlier than its Q-values}. The policy—what the agent decides to do—only depends on which action has the highest Q-value in a state. This relative ordering can stabilize long before the Q-values themselves stop changing numerically.
+
+As shown in Figure~\ref{fig:convergence}, the number of policy changes (left panel) drops to zero after approximately 40 episodes, indicating the agent has discovered and committed to its final strategy. However, the total change in Q-values (right panel) continues to fluctuate throughout the entire training period. This occurs because the agent continues to refine its value estimates based on stochastic outcomes, even though the relative rankings that determine action selection have stabilized. This phenomenon demonstrates that effective decision-making can emerge well before complete value convergence, making Q-learning practical even with finite training time.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/convergence.png}
+    \caption{Convergence analysis showing that policy stabilizes around episode 40 while Q-values continue fluctuating. This demonstrates that optimal decision-making emerges before complete value convergence.}\label{fig:convergence}
+\end{figure}
+
 \subsection{Comparing Standard vs. High-Risk Scenarios}
 To see how the agent adapts to risk, we compared the learned policies from two different experiments: a standard run with a small penalty of -1, and a high-risk run with a massive penalty of -200.
 
@@ -146,73 +227,6 @@ This comparison makes it clear that the agent doesn't just learn a single path; 
     \end{tabular}
     \caption{The agent's highly cautious strategy with a -200 penalty.}\label{fig:policy_high_risk}
 \end{figure}
-\subsection{The Crucial Role of Hyperparameters}
-The agent's learning effectiveness is highly dependent on tuning its core hyperparameters ($\alpha, \gamma, \epsilon$). Figure~\ref{fig:hyperparameter_summary} provides a high-level conceptual overview of their effects.
-
-\begin{itemize}
-    \item \textbf{Learning Rate ($\alpha$):} Controls how \textbf{impressionable} the agent is. A high $\alpha$ leads to faster learning but can be unstable, while a low $\alpha$ is stable but slow.
-    
-    \item \textbf{Discount Factor ($\gamma$):} Controls how \textbf{farsighted} the agent is. A high $\gamma$ is essential for prioritizing long-term rewards like the `+1` prize over short-term penalties.
-    
-    \item \textbf{Exploration Schedule ($\epsilon$ decay):} A \textbf{decaying schedule} is best. The agent starts with high randomness to explore, then gradually reduces it to exploit the optimal path it has found.
-\end{itemize}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{images/hyperparameter_effects_summary.png}
-    \caption{A conceptual summary of how learning rate ($\alpha$), discount factor ($\gamma$), and the exploration schedule ($\epsilon$) impact Q-learning performance, with a table summarizing optimal ranges.}\label{fig:hyperparameter_summary}
-\end{figure}
-
-A more detailed, data-driven analysis is presented in the following figures. This comprehensive plot reveals several key trade-offs:
-\begin{itemize}
-    \item Figure~\ref{fig:hyperparameter_alpha} shows that an intermediate learning rate ($\alpha \approx 0.1-0.3$) provides the best balance between convergence speed and stability. Very high values lead to erratic performance.
-    \item Figure~\ref{fig:hyperparameter_gamma} confirms that a high discount factor ($\gamma \geq 0.9$) is necessary for achieving a good policy, as it encourages long-term planning.
-    \item Figure~\ref{fig:hyperparameter_epsilon} illustrates different exploration schedules. A moderate decay rate (e.g., 0.999) allows for sufficient exploration without wasting too much time on random actions.
-    \item Figure~\ref{fig:hyperparameter_heatmap} visually summarizes the performance for different $\alpha$-$\gamma$ pairs, highlighting a ``sweet spot'' of high performance in the upper-right quadrant (high $\gamma$, moderate $\alpha$).
-    \item Figure~\ref{fig:hyperparameter_efficiency} shows how the episode length changes as the agent learns.
-\end{itemize}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{images/hyperparameter_analysis_alpha.png}
-    \caption{Analysis of the Learning Rate (alpha) on Q-value convergence and learning performance.}\label{fig:hyperparameter_alpha}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{images/hyperparameter_analysis_gamma.png}
-    \caption{Analysis of the Discount Factor (gamma) on Q-value convergence and learning performance.}\label{fig:hyperparameter_gamma}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{images/hyperparameter_analysis_epsilon_decay.png}
-    \caption{Analysis of the Epsilon Decay on Q-value convergence and learning performance.}\label{fig:hyperparameter_epsilon}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{images/hyperparameter_heatmap.png}
-    \caption{A heatmap showing the performance of different combinations of learning rate ($\alpha$) and discount factor ($\gamma$).}\label{fig:hyperparameter_heatmap}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.9\textwidth]{images/hyperparameter_efficiency.png}
-    \caption{Learning efficiency for different learning rates.}\label{fig:hyperparameter_efficiency}
-\end{figure}
-
-\subsection{Understanding Convergence: Policy vs. Q-Values}
-An important observation is that the agent's \textbf{policy converges much earlier than its Q-values}. The policy—what the agent decides to do—only depends on which action has the highest Q-value in a state. This relative ordering can stabilize long before the Q-values themselves stop changing numerically.
-
-As shown in Figure~\ref{fig:convergence}, the number of policy changes (bottom plot) drops to zero after about 40 episodes, meaning the agent has settled on a final strategy. However, the total change in Q-values (top plot) continues to fluctuate for the entire training run, as the agent fine-tunes its ``cheat sheet'' scores. This demonstrates that a stable, optimal policy can be achieved well before the underlying value function has fully converged.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.8\textwidth]{images/convergence.png}
-    \caption{Convergence of Q-values (top) and the policy (bottom) over 100 episodes. The policy stabilizes quickly, while the Q-values continue to be refined.}\label{fig:convergence}
-\end{figure}
-
 
 
 %===============================================================================

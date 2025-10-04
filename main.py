@@ -539,8 +539,8 @@ def plot_alpha_analysis(
         fontsize=18,
         fontweight="bold",
     )
-    ax1.set_xlabel("Episode", fontsize=16)
-    ax1.set_ylabel("Q-Value Change (Moving Avg)", fontsize=16)
+    ax1.set_xlabel("Episode", fontsize=18)
+    ax1.set_ylabel("Q-Value Change (Moving Avg)", fontsize=18)
     ax1.legend()
     ax1.grid(True, alpha=0.3)
     ax1.set_yscale("log")
@@ -561,8 +561,8 @@ def plot_alpha_analysis(
         fontsize=18,
         fontweight="bold",
     )
-    ax2.set_xlabel("Episode", fontsize=16)
-    ax2.set_ylabel("Episode Reward (Moving Avg)", fontsize=16)
+    ax2.set_xlabel("Episode", fontsize=18)
+    ax2.set_ylabel("Episode Reward (Moving Avg)", fontsize=18)
     ax2.legend()
     ax2.grid(True, alpha=0.3)
 
@@ -581,8 +581,8 @@ def plot_alpha_analysis(
         fontsize=18,
         fontweight="bold",
     )
-    ax3.set_xlabel("Learning Rate (a)", fontsize=16)
-    ax3.set_ylabel("Final Q-Value Change (Last 50 episodes)", fontsize=16)
+    ax3.set_xlabel("Learning Rate (a)", fontsize=18)
+    ax3.set_ylabel("Final Q-Value Change (Last 50 episodes)", fontsize=18)
     ax3.set_yscale("log")
     ax3.grid(True, alpha=0.3)
 
@@ -622,8 +622,8 @@ def plot_gamma_analysis(
         fontsize=18,
         fontweight="bold",
     )
-    ax4.set_xlabel("Episode", fontsize=16)
-    ax4.set_ylabel("Q-Value Change (Moving Avg)", fontsize=16)
+    ax4.set_xlabel("Episode", fontsize=18)
+    ax4.set_ylabel("Q-Value Change (Moving Avg)", fontsize=18)
     ax4.legend()
     ax4.grid(True, alpha=0.3)
     ax4.set_yscale("log")
@@ -644,8 +644,8 @@ def plot_gamma_analysis(
         fontsize=18,
         fontweight="bold",
     )
-    ax5.set_xlabel("Episode", fontsize=16)
-    ax5.set_ylabel("Episode Reward (Moving Avg)", fontsize=16)
+    ax5.set_xlabel("Episode", fontsize=18)
+    ax5.set_ylabel("Episode Reward (Moving Avg)", fontsize=18)
     ax5.legend()
     ax5.grid(True, alpha=0.3)
 
@@ -664,8 +664,8 @@ def plot_gamma_analysis(
         fontsize=18,
         fontweight="bold",
     )
-    ax6.set_xlabel("Discount Factor (g)", fontsize=16)
-    ax6.set_ylabel("Final Q-Value Change (Last 50 episodes)", fontsize=16)
+    ax6.set_xlabel("Discount Factor (g)", fontsize=18)
+    ax6.set_ylabel("Final Q-Value Change (Last 50 episodes)", fontsize=18)
     ax6.set_yscale("log")
     ax6.grid(True, alpha=0.3)
 
@@ -706,8 +706,8 @@ def plot_epsilon_decay_analysis(
         fontsize=18,
         fontweight="bold",
     )
-    ax7.set_xlabel("Episode", fontsize=16)
-    ax7.set_ylabel("Q-Value Change (Moving Avg)", fontsize=16)
+    ax7.set_xlabel("Episode", fontsize=18)
+    ax7.set_ylabel("Q-Value Change (Moving Avg)", fontsize=18)
     ax7.legend()
     ax7.grid(True, alpha=0.3)
     ax7.set_yscale("log")
@@ -728,8 +728,8 @@ def plot_epsilon_decay_analysis(
         fontsize=18,
         fontweight="bold",
     )
-    ax8.set_xlabel("Episode", fontsize=16)
-    ax8.set_ylabel("Episode Reward (Moving Avg)", fontsize=16)
+    ax8.set_xlabel("Episode", fontsize=18)
+    ax8.set_ylabel("Episode Reward (Moving Avg)", fontsize=18)
     ax8.legend()
     ax8.grid(True, alpha=0.3)
 
@@ -748,8 +748,8 @@ def plot_epsilon_decay_analysis(
         fontsize=18,
         fontweight="bold",
     )
-    ax9.set_xlabel("Epsilon Decay Rate", fontsize=16)
-    ax9.set_ylabel("Final Q-Value Change (Last 50 episodes)", fontsize=16)
+    ax9.set_xlabel("Epsilon Decay Rate", fontsize=18)
+    ax9.set_ylabel("Final Q-Value Change (Last 50 episodes)", fontsize=18)
     ax9.set_yscale("log")
     ax9.grid(True, alpha=0.3)
 
@@ -773,8 +773,8 @@ def plot_epsilon_decay_analysis(
         fontsize=18,
         fontweight="bold",
     )
-    ax10.set_xlabel("Episode", fontsize=16)
-    ax10.set_ylabel("Epsilon (e)", fontsize=16)
+    ax10.set_xlabel("Episode", fontsize=18)
+    ax10.set_ylabel("Epsilon (e)", fontsize=18)
     ax10.legend()
     ax10.grid(True, alpha=0.3)
     fig.tight_layout(rect=(0, 0.03, 1, 0.95))
@@ -810,8 +810,8 @@ def plot_efficiency_summary(
                     label=f"a = {alpha}",
                 )
 
-    ax.set_xlabel("Episode", fontsize=16)
-    ax.set_ylabel("Episode Length (Moving Avg)", fontsize=16)
+    ax.set_xlabel("Episode", fontsize=18)
+    ax.set_ylabel("Episode Length (Moving Avg)", fontsize=18)
     ax.legend()
     ax.grid(True, alpha=0.3)
     fig.tight_layout(rect=(0, 0.03, 1, 0.95))
@@ -855,8 +855,8 @@ def plot_performance_heatmap(
             performance_matrix[i, j] = np.mean(result.rewards[-20:])
 
     im = ax.imshow(performance_matrix, cmap="RdYlGn", aspect="auto")
-    ax.set_xlabel("Discount Factor (g)", fontsize=16)
-    ax.set_ylabel("Learning Rate (a)", fontsize=16)
+    ax.set_xlabel("Discount Factor (g)", fontsize=18)
+    ax.set_ylabel("Learning Rate (a)", fontsize=18)
 
     ax.set_xticks(range(len(gamma_values)))
     ax.set_xticklabels([str(g) for g in gamma_values])
@@ -927,8 +927,8 @@ def _plot_alpha_effect(ax, episodes):
     ax.plot(episodes, med_alpha, "g-", linewidth=2.5, label="Optimal a (0.2)")
     ax.plot(episodes, high_alpha, "r-", linewidth=2.5, label="High a (0.7)")
     ax.set_title("Learning Rate (a) Effect", fontsize=18, fontweight="bold")
-    ax.set_xlabel("Episode", fontsize=16)
-    ax.set_ylabel("Learning Progress", fontsize=16)
+    ax.set_xlabel("Episode", fontsize=18)
+    ax.set_ylabel("Learning Progress", fontsize=18)
     ax.legend()
     ax.grid(True, alpha=0.3)
 
@@ -942,8 +942,8 @@ def _plot_gamma_effect(ax, episodes):
     ax.plot(episodes, gamma_med, "green", linewidth=2.5, label="Optimal g (0.9)")
     ax.plot(episodes, gamma_high, "purple", linewidth=2.5, label="High g (0.99)")
     ax.set_title("Discount Factor (g) Effect", fontsize=18, fontweight="bold")
-    ax.set_xlabel("Episode", fontsize=16)
-    ax.set_ylabel("Policy Quality", fontsize=16)
+    ax.set_xlabel("Episode", fontsize=18)
+    ax.set_ylabel("Policy Quality", fontsize=18)
     ax.legend()
     ax.grid(True, alpha=0.3)
 
@@ -969,8 +969,8 @@ def _plot_epsilon_effect(ax, episodes):
         label="Slow Decay (0.9999)",
     )
     ax.set_title("Exploration Schedule (e decay)", fontsize=18, fontweight="bold")
-    ax.set_xlabel("Episode", fontsize=16)
-    ax.set_ylabel("Epsilon (Exploration Rate)", fontsize=16)
+    ax.set_xlabel("Episode", fontsize=18)
+    ax.set_ylabel("Epsilon (Exploration Rate)", fontsize=18)
     ax.set_yscale("log")
     ax.legend()
     ax.grid(True, alpha=0.3)
@@ -1008,8 +1008,8 @@ def _plot_combined_effects(ax, episodes):
         label="Fast e Decay",
     )
     ax.set_title("Combined Hyperparameter Effects", fontsize=18, fontweight="bold")
-    ax.set_xlabel("Episode", fontsize=16)
-    ax.set_ylabel("Performance", fontsize=16)
+    ax.set_xlabel("Episode", fontsize=18)
+    ax.set_ylabel("Performance", fontsize=18)
     ax.legend()
     ax.grid(True, alpha=0.3)
 
@@ -1346,8 +1346,8 @@ def plot_convergence(q_changes, policy_changes):
     # Q-value convergence
     ax1.plot(q_changes, label="Q-value Change")
     ax1.set_title("Q-Value Convergence")
-    ax1.set_xlabel("Episode", fontsize=16)
-    ax1.set_ylabel("Total Q-value Change", fontsize=16)
+    ax1.set_xlabel("Episode", fontsize=18)
+    ax1.set_ylabel("Total Q-value Change", fontsize=18)
     ax1.set_yscale("log")
     ax1.grid(True, which="both", linestyle="--", linewidth=0.5)
     ax1.legend()
@@ -1355,8 +1355,8 @@ def plot_convergence(q_changes, policy_changes):
     # Policy stability
     ax2.plot(policy_changes, label="Policy Changes")
     ax2.set_title("Policy Stability")
-    ax2.set_xlabel("Episode", fontsize=16)
-    ax2.set_ylabel("Number of Policy Changes", fontsize=16)
+    ax2.set_xlabel("Episode", fontsize=18)
+    ax2.set_ylabel("Number of Policy Changes", fontsize=18)
     ax2.grid(True, linestyle="--", linewidth=0.5)
     ax2.legend()
 

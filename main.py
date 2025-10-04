@@ -403,7 +403,7 @@ def run_training_session(
         cumulative_rewards.append(episode_reward)
         episode_lengths.append(episode_length)
 
-        if (episode + 1) % max(10, episodes // 10) == 0:
+        if (episode + 1) % max(10, episodes) == 0:
             print(
                 f"Episode {episode + 1:,}/{episodes:,} | Epsilon: {agent.epsilon:.4f}",
             )
@@ -450,6 +450,7 @@ def analyze_hyperparameters(
     alpha_values: list[float],
     gamma_values: list[float],
     epsilon_decay_values: list[float],
+    moving_average_window: int,
 ) -> None:
     """Create comprehensive hyperparameter analysis plots with enhanced visualization."""
     env = GridWorld(penalty=penalty)
@@ -496,10 +497,12 @@ def analyze_hyperparameters(
         ),
     )
 
-    plot_alpha_analysis(alpha_results, alpha_values)
-    plot_gamma_analysis(gamma_results, gamma_values)
-    plot_epsilon_decay_analysis(epsilon_results, epsilon_decay_values, episodes)
-    plot_efficiency_summary(alpha_results)
+    plot_alpha_analysis(alpha_results, alpha_values, moving_average_window)
+    plot_gamma_analysis(gamma_results, gamma_values, moving_average_window)
+    plot_epsilon_decay_analysis(
+        epsilon_results, epsilon_decay_values, episodes, moving_average_window
+    )
+    plot_efficiency_summary(alpha_results, moving_average_window)
     plot_performance_heatmap(alpha_values, gamma_values)
 
     print_analysis_summary()
@@ -512,6 +515,7 @@ def plot_hyperparameter_analysis() -> None:
 def plot_alpha_analysis(
     alpha_results: dict[float, TrainingResults],
     alpha_values: list[float],
+    moving_average_window: int,
 ) -> None:
     """Plots the analysis for the alpha hyperparameter."""
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(24, 7))
@@ -522,7 +526,7 @@ def plot_alpha_analysis(
     )
 
     for alpha, results in alpha_results.items():
-        window = 20
+        window = moving_average_window
         q_changes = results.q_changes
         if len(q_changes) >= window:
             q_smooth = np.convolve(q_changes, np.ones(window) / window, mode="valid")
@@ -547,7 +551,7 @@ def plot_alpha_analysis(
 
     for alpha, results in alpha_results.items():
         rewards = results.rewards
-        window = 50
+        window = moving_average_window  # Scale down for reward smoothing
         if len(rewards) >= window:
             reward_smooth = np.convolve(rewards, np.ones(window) / window, mode="valid")
             ax2.plot(
@@ -595,6 +599,7 @@ def plot_alpha_analysis(
 def plot_gamma_analysis(
     gamma_results: dict[float, TrainingResults],
     gamma_values: list[float],
+    moving_average_window: int,
 ) -> None:
     """Plots the analysis for the gamma hyperparameter."""
     fig, (ax4, ax5, ax6) = plt.subplots(1, 3, figsize=(24, 7))
@@ -605,7 +610,7 @@ def plot_gamma_analysis(
     )
 
     for gamma, results in gamma_results.items():
-        window = 20
+        window = moving_average_window  # Scale down for gamma analysis
         q_changes = results.q_changes
         if len(q_changes) >= window:
             q_smooth = np.convolve(q_changes, np.ones(window) / window, mode="valid")
@@ -630,7 +635,7 @@ def plot_gamma_analysis(
 
     for gamma, results in gamma_results.items():
         rewards = results.rewards
-        window = 50
+        window = moving_average_window  # Scale down for reward smoothing
         if len(rewards) >= window:
             reward_smooth = np.convolve(rewards, np.ones(window) / window, mode="valid")
             ax5.plot(
@@ -679,6 +684,7 @@ def plot_epsilon_decay_analysis(
     epsilon_results: dict[float, TrainingResults],
     epsilon_decay_values: list[float],
     episodes: int,
+    moving_average_window: int,
 ) -> None:
     """Plots the analysis for the epsilon decay hyperparameter."""
     fig, (ax7, ax8, ax9, ax10) = plt.subplots(1, 4, figsize=(32, 7))
@@ -689,7 +695,7 @@ def plot_epsilon_decay_analysis(
     )
 
     for epsilon_decay, results in epsilon_results.items():
-        window = 20
+        window = moving_average_window  # Scale down for epsilon decay analysis
         q_changes = results.q_changes
         if len(q_changes) >= window:
             q_smooth = np.convolve(q_changes, np.ones(window) / window, mode="valid")
@@ -714,7 +720,7 @@ def plot_epsilon_decay_analysis(
 
     for epsilon_decay, results in epsilon_results.items():
         rewards = results.rewards
-        window = 50
+        window = moving_average_window  # Scale down for reward smoothing
         if len(rewards) >= window:
             reward_smooth = np.convolve(rewards, np.ones(window) / window, mode="valid")
             ax8.plot(
@@ -785,6 +791,7 @@ def plot_epsilon_decay_analysis(
 
 def plot_efficiency_summary(
     alpha_results: dict[float, TrainingResults],
+    moving_average_window: int,
 ) -> None:
     """Plots the learning efficiency based on episode length."""
     fig, ax = plt.subplots(1, 1, figsize=(10, 8))
@@ -797,7 +804,7 @@ def plot_efficiency_summary(
     for alpha in [0.01, 0.1, 0.5, 0.9]:
         if alpha in alpha_results:
             lengths = alpha_results[alpha].episode_lengths
-            window = 50
+            window = moving_average_window  # Scale down for efficiency summary
             if len(lengths) >= window:
                 length_smooth = np.convolve(
                     lengths,
@@ -1107,7 +1114,7 @@ def create_hyperparameter_summary(
     """Generate a text summary of hyperparameter analysis."""
     final_window = max(
         1,
-        len(next(iter(next(iter(results.values())).values())).rewards) // 10,
+        len(next(iter(next(iter(results.values())).values())).rewards),
     )
 
     alpha_performance = {
@@ -1176,7 +1183,7 @@ def print_detailed_hyperparameter_analysis(
     print("DETAILED HYPERPARAMETER ANALYSIS RESULTS")
     print("=" * 80)
 
-    final_window = max(1, episodes // 10)
+    final_window = max(1, episodes)
 
     print("\n📊 LEARNING RATE (a) ANALYSIS:")
     print(f"{'a':<8} {'Final Reward':<15} {'Avg Q-Change':<15} {'Convergence':<15}")
@@ -1338,13 +1345,26 @@ def print_convergence_summary(
     )
 
 
-def plot_convergence(q_changes, policy_changes):
-    """Plot convergence metrics."""
+def plot_convergence(q_changes, policy_changes, moving_average_window=100):
+    """Plot convergence metrics with moving average smoothing."""
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 6))
     fig.suptitle("Convergence Analysis", fontsize=18, fontweight="bold")
 
-    # Q-value convergence
-    ax1.plot(q_changes, label="Q-value Change")
+    # Q-value convergence with moving average
+    window = moving_average_window  # Scale down for convergence analysis
+    if len(q_changes) >= window:
+        q_smooth = np.convolve(q_changes, np.ones(window) / window, mode="valid")
+        ax1.plot(q_changes, alpha=0.3, color="lightblue", label="Raw Q-value Change")
+        ax1.plot(
+            range(window - 1, len(q_changes)),
+            q_smooth,
+            color="darkblue",
+            linewidth=2,
+            label=f"Moving Average (window={window})",
+        )
+    else:
+        ax1.plot(q_changes, label="Q-value Change")
+
     ax1.set_title("Q-Value Convergence")
     ax1.set_xlabel("Episode", fontsize=18)
     ax1.set_ylabel("Total Q-value Change", fontsize=18)
@@ -1352,8 +1372,24 @@ def plot_convergence(q_changes, policy_changes):
     ax1.grid(True, which="both", linestyle="--", linewidth=0.5)
     ax1.legend()
 
-    # Policy stability
-    ax2.plot(policy_changes, label="Policy Changes")
+    # Policy stability with moving average
+    if len(policy_changes) >= window:
+        policy_smooth = np.convolve(
+            policy_changes, np.ones(window) / window, mode="valid"
+        )
+        ax2.plot(
+            policy_changes, alpha=0.3, color="lightcoral", label="Raw Policy Changes"
+        )
+        ax2.plot(
+            range(window - 1, len(policy_changes)),
+            policy_smooth,
+            color="darkred",
+            linewidth=2,
+            label=f"Moving Average (window={window})",
+        )
+    else:
+        ax2.plot(policy_changes, label="Policy Changes")
+
     ax2.set_title("Policy Stability")
     ax2.set_xlabel("Episode", fontsize=18)
     ax2.set_ylabel("Number of Policy Changes", fontsize=18)
@@ -1385,11 +1421,12 @@ def print_policy(agent, env):
 
 def main() -> None:
     """Run the full Q-learning analysis pipeline."""
-    episodes = 100
+    episodes = 10000
     base_penalty = -1.0
     alpha_values = [0.01, 0.1, 0.3, 0.5, 0.9]
     gamma_values = [0.5, 0.7, 0.9, 0.99]
     epsilon_decay_values = [0.99, 0.995, 0.999, 0.9999]
+    moving_average_window = 1000
 
     print("=" * 80)
     print("RUNNING HYPERPARAMETER ANALYSIS")
@@ -1401,6 +1438,7 @@ def main() -> None:
         alpha_values,
         gamma_values,
         epsilon_decay_values,
+        moving_average_window,
     )
 
     high_penalty = -10.0
@@ -1426,6 +1464,7 @@ def main() -> None:
     plot_convergence(
         results_high_penalty.q_changes,
         results_high_penalty.policy_changes,
+        moving_average_window,
     )
 
     create_summary_figure()

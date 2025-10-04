@@ -1,174 +1,134 @@
-# Q-Learning GridWorld - Reinforcement Learning with Hyperparameter Analysis
+# RL in Robotics: A Q-Learning Adventure in GridWorld
 
-A comprehensive implementation of the Q-learning algorithm applied to a classic GridWorld navigation problem. This project demonstrates fundamental reinforcement learning concepts and includes powerful tools for hyperparameter analysis and visualization.
+Welcome! This project is a deep dive into the world of Reinforcement Learning (RL), using the classic Q-learning algorithm to teach an agent how to navigate a tricky GridWorld. But it's more than just a simple implementation; it's a complete toolkit for exploring how different parameters shape an AI's learning process.
 
-## 🎯 Project Overview
+Think of it as a science lab for RL. You can tweak the agent's "personality" (its hyperparameters) and see exactly how it affects its ability to learn, adapt, and succeed.
 
-This project implements a **Q-learning agent** that learns to navigate a 4×3 grid world. Beyond a basic implementation, this script provides a full suite of tools to analyze and visualize the impact of different hyperparameters on agent performance, making it an excellent framework for understanding the nuances of reinforcement learning.
+## 🎯 What's Inside?
 
-### Key Features
+This isn't just about getting from a start to a goal. It's about understanding the *how* and *why* of the learning process.
 
-- **Q-Learning Algorithm**: A robust implementation of the model-free reinforcement learning algorithm.
-- **Stochastic Environment**: A realistic movement model where actions have an 80% success rate, with a 10% chance of drifting left or right.
-- **Comprehensive Hyperparameter Analysis**: Automatically runs experiments and generates detailed plots for learning rate (α), discount factor (γ), and exploration decay (ε).
-- **Advanced Data Visualization**: Generates a detailed 12-panel plot including convergence graphs, performance comparisons, stability analysis, and a performance heatmap.
-- **Scenario Comparison**: Includes a high-penalty scenario to demonstrate how the agent adapts to different environmental constraints.
-- **Modular and Refactored Code**: The code is organized with clear separation of concerns, making it easy to understand and extend.
+### Key Features:
 
-## 📊 Analysis and Visualization
+-   **Smart Q-Learning Agent**: A from-scratch implementation of the Q-learning algorithm.
+-   **An Unpredictable World**: The agent moves in a stochastic environment, meaning actions aren't always perfect. There's an 80% chance of success, and a 10% chance of veering left or right, just like in the real world where things don't always go as planned.
+-   **Hyperparameter Playground**: The fun part! The code automatically runs experiments to see how the learning rate (α), discount factor (γ), and exploration strategy (ε) change the agent's behavior.
+-   **Rich Visualizations**: It's one thing to run experiments, but another to see the results. The script generates beautiful, detailed plots that show you everything from the agent's convergence path to a heatmap of its performance.
+-   **Adaptable Scenarios**: You can change the stakes by setting a high penalty for certain tiles, forcing the agent to learn a completely different, safer path.
+-   **Clean, Modern Code**: The project is built with modern Python practices, making it easy to read, extend, and learn from.
 
-The script automatically generates a comprehensive hyperparameter analysis plot that provides deep insights into the learning process.
+## 📊 See the Learning in Action
 
+The best part of this project is the automatic analysis. After the agent is trained, the script produces a comprehensive plot that gives you a bird's-eye view of the entire learning journey.
 
-This visualization includes:
-1.  **Q-Value Convergence**: Tracks how Q-values stabilize over time for different hyperparameters.
-2.  **Learning Performance**: Shows the moving average of episode rewards to evaluate policy effectiveness.
-3.  **Final Q-Value Stability**: Bar charts comparing the final convergence of Q-values.
-4.  **Exploration Schedule**: Visualizes how the exploration rate (ε) decreases over time with different decay settings.
-5.  **Learning Efficiency**: Compares episode lengths to see how quickly the agent finds the goal.
-6.  **Performance Heatmap**: A 2D grid showing the final performance for different combinations of `alpha` and `gamma`.
+![Hyperparameter Analysis](images/hyperparameter_analysis_summary.png)
 
-## 🏗️ Grid World Environment
+This visualization helps you answer questions like:
+
+1.  **Is the agent actually learning?** (Q-Value Convergence)
+2.  **How successful is it?** (Learning Performance)
+3.  **How quickly does it find the goal?** (Learning Efficiency)
+4.  **Which settings work best?** (A heatmap showing performance across different `alpha` and `gamma` values)
+
+## 🏗️ The Grid World Environment
+
+Here's the world our agent lives in. It's a simple 4x3 grid with a goal, a penalty (a "trap"), and a wall.
 
 ```
 +---+---+---+---+
-|   |   |   | +1| ← Goal state (reward: +1.0)
+|   |   |   | +1|  <-- The Goal! (Reward: +1.0)
 +---+---+---+---+
-|   |XXX|   | -1| ← Penalty state (reward: -1.0 or -200.0)
+|   |XXX|   | -1|  <-- The Trap! (Reward: -1.0)
 +---+---+---+---+
-| S |   |   |   | ← Start state
+| S |   |   |   |  <-- Our brave agent starts here.
 +---+---+---+---+
 ```
 
-- **States**: 11 valid positions (excluding the wall).
-- **Actions**: 4 movements (North, South, East, West).
-- **Stochastic Transitions**: 80% chance of intended move, 10% chance of moving 90° left, 10% chance of moving 90° right.
+-   **States**: 11 places the agent can be.
+-   **Actions**: The four cardinal directions (North, South, East, West).
+-   **The Twist**: The world is stochastic. When the agent decides to move, it only has an 80% chance of going in the intended direction. The other 20% of the time, it might drift off course.
 
-## 🧠 Q-Learning Algorithm
+## 🧠 The Brains: Q-Learning
 
-The agent learns using the Q-learning update rule:
+The agent uses the Q-learning algorithm to figure out the best action to take in any given state. It learns by updating its "Q-table" using this formula:
 
 ```
 Q(s,a) ← Q(s,a) + α[r + γ·max(Q(s',a')) - Q(s,a)]
 ```
 
-- **α (alpha)**: Learning Rate
-- **γ (gamma)**: Discount Factor
-- **ε (epsilon)**: Exploration Rate
+In simple terms: the value of taking an action `a` in a state `s` is updated based on the reward `r` and the best possible value it could get in the next state `s'`.
 
-## 📋 Requirements
+-   **α (alpha)**: The **Learning Rate**. How much should new information override old information?
+-   **γ (gamma)**: The **Discount Factor**. How much does the agent value future rewards over immediate ones?
+-   **ε (epsilon)**: The **Exploration Rate**. How often should the agent try a random action to explore the world, versus taking the action it thinks is best?
 
-### System Requirements
-- Python 3.11 or higher
-- macOS, Linux, or Windows
+## 📋 What You'll Need
 
-### Dependencies
-- `numpy`
-- `matplotlib`
+-   Python 3.11 or newer.
+-   A love for cool graphs (`matplotlib`).
+-   A need for speed (`numpy`).
 
-## ⚙️ Installation
+## ⚙️ Get Started
 
-### Using UV (Recommended)
+This project uses [**UV**](https://docs.astral.sh/uv/), a super-fast Python package manager that makes setup a breeze.
 
-This project uses [UV](https://docs.astral.sh/uv/) for fast Python package management.
+1.  **Install UV** (if you don't have it):
 
-1.  **Install UV**:
     ```bash
-    # macOS/Linux
+    # On macOS, Linux, or WSL
     curl -LsSf https://astral.sh/uv/install.sh | sh
     ```
-2.  **Clone and setup**:
+
+2.  **Clone the project and get inside**:
+
     ```bash
     git clone https://github.com/Jeevan-HM/RL-in-Robotics.git
     cd RL-in-Robotics
     ```
-3.  **Install dependencies** (UV creates a virtual environment automatically):
+
+3.  **Sync up!** UV will create a virtual environment and install everything you need in one command:
     ```bash
     uv sync
     ```
 
-### Using pip/conda
+That's it! You're ready to go.
 
-1.  **Clone the repository**:
-    ```bash
-    git clone https://github.com/Jeevan-HM/RL-in-Robotics.git
-    cd RL-in-Robotics
-    ```
-2.  **Create and activate a virtual environment**:
-    ```bash
-    # Using venv
-    python -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activate
-    ```
-3.  **Install dependencies**:
-    ```bash
-    pip install numpy matplotlib
-    ```
+## 🚀 Run the Main Analysis
 
-## 🚀 Usage
-
-Execute the main script to run the full analysis pipeline. The script will:
-1.  Run a single training session with default parameters.
-2.  Conduct a detailed hyperparameter analysis.
-3.  Run a comparative scenario with a high penalty.
-4.  Generate and display plots.
+To run the full hyperparameter analysis and generate all the plots, just run the `main.py` script:
 
 ```bash
-# If using UV
 uv run python main.py
-
-# If using pip/conda (with activated environment)
-python main.py
 ```
 
-### Customizing Experiments
+The script will train the agent under different conditions and save the analysis plots in the `images/` directory. You'll see progress updates printed to the console as it works.
 
-You can easily customize the experiments by modifying the configuration parameters inside the `main()` function in `main.py`:
+### Command-Line Options
 
-```python
-def main():
-    # Training Configuration
-    episodes = 100
-    base_penalty = -1.0
-    high_penalty = -200.0
+You can also customize the run. For example, to run for more episodes or with a higher penalty:
 
-    # Hyperparameter Tuning Configuration
-    alpha_values = [0.01, 0.1, 0.5, 0.9]
-    gamma_values = [0.5, 0.9, 0.99]
-    epsilon_decay_values = [0.001, 0.99, 0.995, 0.999, 0.9999]
-    
-    # ... rest of the main function
+```bash
+uv run python main.py --episodes 20000 --penalty -50.0
 ```
 
-## �️ Code Structure
+Use the `--help` flag to see all available options:
 
-The project is organized into modular components for clarity and extensibility.
-
-```
-RL-in-Robotics/
-├── main.py              # Main script with analysis functions
-├── README.md            # This file
-├── pyproject.toml       # Project configuration and dependencies
-├── uv.lock              # Locked dependency versions (UV)
-└── Figure_1.png         # Example output plot
+```bash
+uv run python main.py --help
 ```
 
-### Key Functions in `main.py`
+## 🎨 Visualize the Q-Table
 
-- **`GridWorld` class**: Implements the environment, including state transitions and rewards.
-- **`QLearningAgent` class**: Implements the Q-learning algorithm, including the learning rule and exploration strategy.
-- **`run_training_session()`**: A unified function to run a complete training loop for a given agent and environment.
-- **`analyze_hyperparameters()`**: Orchestrates the hyperparameter study by running experiments for different values of α, γ, and ε.
-- **`plot_hyperparameter_analysis()`**: Generates the comprehensive 12-panel plot for analysis.
-- **`main()`**: The main entry point that configures and runs all experiments and visualizations.
+Ever wonder what the agent is "thinking"? You can generate a heatmap of the Q-table to see which states it values most.
 
-## 👨‍💻 Author
+![Q-Table Heatmap](images/q_table_heatmap.png)
 
-**Jeevan-Hebbal Manjunath**
-- GitHub: [@Jeevan-HM](https://github.com/Jeevan-HM)
+This gives you a fascinating look into the agent's learned knowledge, showing the paths it has identified as valuable.
 
-**Yeshwanth Reddy Gurreddy**
+## 🤝 Contributing
 
-**Varun Karthik**
+This was a fun project to build, and I'm always open to ideas! If you have suggestions for improvements, feel free to open an issue or submit a pull request.
 
-Project: [RL-in-Robotics](https://github.com/Jeevan-HM/RL-in-Robotics)
+## 📜 License
+
+This project is open-source, under the MIT License. See the `LICENSE` file for more details.

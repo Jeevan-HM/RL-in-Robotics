@@ -28,7 +28,7 @@
 % TITLE
 %===============================================================================
 \title{\textbf{Teaching an Agent to Navigate a Risky World: \\ A Q-Learning Adventure}}
-\author{\Large\textbf{Team 01}  \\Jeevan Hebbal Manjunath, Varun Karthik, Yeshwanth Rddy Gurreddy}
+\author{\Large\textbf{Team 01}  \\Jeevan Hebbal Manjunath, Varun Karthik, Yeshwanth Reddy Gurreddy}
 \date{\today}
 
 %===============================================================================
@@ -228,6 +228,32 @@ This comparison makes it clear that the agent doesn't just learn a single path; 
     \caption{The agent's highly cautious strategy with a -200 penalty.}\label{fig:policy_high_risk}
 \end{figure}
 
+\subsection{Understanding the Q-Table: The Agent's Internal Knowledge}
+To truly understand how the agent makes decisions, we can examine its internal ``cheat sheet''—the Q-table. This table contains the learned values for every action in every state, representing the agent's accumulated knowledge about the expected future rewards from each possible move.
+
+Figure~\ref{fig:q_table_heatmap} shows the Q-values learned by the agent in the high-risk scenario (penalty = -200). Each subplot represents the Q-values for a specific action (North, South, East, West), with colors indicating the desirability of that action from each position:
+
+\begin{itemize}
+    \item \textbf{Red colors} indicate high Q-values (good actions)
+    \item \textbf{Blue colors} indicate low Q-values (actions to avoid)
+    \item The numerical values show the exact learned Q-values
+\end{itemize}
+
+Key observations from the Q-table visualization:
+\begin{enumerate}
+    \item \textbf{Goal attraction:} States near the goal (4,3) show high Q-values for actions that move toward it.
+    \item \textbf{Penalty avoidance:} States near the penalty trap (4,2) show strongly negative Q-values for actions that might lead there, especially considering the stochastic movement.
+    \item \textbf{Risk propagation:} The negative values ``spread'' from the penalty state to nearby states, showing how the agent learned to avoid not just the trap itself, but also risky positions nearby.
+    \item \textbf{Safe path preference:} The left side of the grid shows consistently higher Q-values, reflecting the agent's learned preference for the safer route.
+\end{enumerate}
+
+This Q-table represents the culmination of 10,000 episodes of learning—a compact summary of everything the agent discovered about navigating this risky world.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/q_table_heatmap.png}
+    \caption{Q-table heatmap showing learned Q-values for each action from every state. The visualization reveals how the agent learned to value actions based on their expected future rewards, with clear patterns of goal attraction and penalty avoidance.}\label{fig:q_table_heatmap}
+\end{figure}
 
 %===============================================================================
 \section{Final Thoughts}

@@ -1419,6 +1419,111 @@ def print_policy(agent, env):
         print(row)
 
 
+def plot_q_table_heatmap(agent: QLearningAgent, env: GridWorld) -> None:
+    """
+    Create a heatmap visualization of the Q-table showing Q-values for each action.
+
+    Args:
+        agent: The trained Q-learning agent
+        env: The GridWorld environment
+
+    """
+    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+    fig.suptitle("Q-Table Heatmaps by Action", fontsize=16, fontweight="bold")
+
+    actions = ["N", "S", "E", "W"]
+    action_names = {"N": "North", "S": "South", "E": "East", "W": "West"}
+
+    # Create grid for each action
+    for idx, action in enumerate(actions):
+        ax = axes[idx // 2, idx % 2]
+
+        # Initialize grid with NaN values
+        grid = np.full((env.grid_size[1], env.grid_size[0]), np.nan)
+
+        # Fill grid with Q-values
+        for state in agent.states:
+            x, y = state
+            if state != env.wall_state:
+                # Convert to grid coordinates (flip y-axis)
+                grid_y = env.grid_size[1] - y
+                grid_x = x - 1
+                grid[grid_y, grid_x] = agent.q_table[state][action]
+
+        # Create heatmap
+        im = ax.imshow(grid, cmap="RdYlBu_r", aspect="equal")
+        ax.set_title(f"{action_names[action]} ({action})", fontweight="bold")
+
+        # Add colorbar
+        plt.colorbar(im, ax=ax, shrink=0.8)
+
+        # Add grid labels
+        ax.set_xticks(range(env.grid_size[0]))
+        ax.set_yticks(range(env.grid_size[1]))
+        ax.set_xticklabels([f"x={i + 1}" for i in range(env.grid_size[0])])
+        ax.set_yticklabels(
+            [f"y={env.grid_size[1] - i}" for i in range(env.grid_size[1])]
+        )
+
+        # Add Q-values as text on each cell with prominent colors for goal and penalty
+        for y in range(env.grid_size[1]):
+            for x in range(env.grid_size[0]):
+                state = (x + 1, env.grid_size[1] - y)
+                if state == env.wall_state:
+                    ax.text(
+                        x,
+                        y,
+                        "WALL",
+                        ha="center",
+                        va="center",
+                        fontweight="bold",
+                        color="black",
+                        fontsize=12,
+                    )
+                elif state in env.terminal_states:
+                    reward = env.terminal_states[state]
+                    if reward > 0:
+                        # Goal state - use bright green color
+                        ax.text(
+                            x,
+                            y,
+                            "GOAL",
+                            ha="center",
+                            va="center",
+                            fontweight="bold",
+                            color="lime",
+                            fontsize=14,
+                        )
+                    else:
+                        # Penalty state - use bright red color
+                        ax.text(
+                            x,
+                            y,
+                            "PENALTY (-1)",
+                            ha="center",
+                            va="center",
+                            fontweight="bold",
+                            color="red",
+                            fontsize=14,
+                        )
+                elif not np.isnan(grid[y, x]):
+                    # Regular Q-values - use black text
+                    ax.text(
+                        x,
+                        y,
+                        f"{grid[y, x]:.2f}",
+                        ha="center",
+                        va="center",
+                        fontweight="bold",
+                        color="black",
+                        fontsize=10,
+                    )
+
+    plt.tight_layout()
+    plt.savefig("images/q_table_heatmap.png", dpi=300, bbox_inches="tight")
+    plt.show()
+
+
 def main() -> None:
     """Run the full Q-learning analysis pipeline."""
     episodes = 10000
@@ -1461,6 +1566,7 @@ def main() -> None:
         episodes,
     )
     print_policy(agent_high_penalty, env_high_penalty)
+    plot_q_table_heatmap(agent_high_penalty, env_high_penalty)
     plot_convergence(
         results_high_penalty.q_changes,
         results_high_penalty.policy_changes,

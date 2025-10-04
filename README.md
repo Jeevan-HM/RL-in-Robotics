@@ -124,11 +124,3 @@ Ever wonder what the agent is "thinking"? You can generate a heatmap of the Q-ta
 ![Q-Table Heatmap](images/q_table_heatmap.png)
 
 This gives you a fascinating look into the agent's learned knowledge, showing the paths it has identified as valuable.
-
-## 🤝 Contributing
-
-This was a fun project to build, and I'm always open to ideas! If you have suggestions for improvements, feel free to open an issue or submit a pull request.
-
-## 📜 License
-
-This project is open-source, under the MIT License. See the `LICENSE` file for more details.

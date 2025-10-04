@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RL in Robotics: A Q-Learning Adventure in GridWorld</title>
+
+    <!-- Framework CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css" id="theme">
+
+    <!-- Code Highlight CSS -->
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <style>
+        :root {
+            --r-main-font: 'Inter', sans-serif;
+            --r-heading-font: 'Inter', sans-serif;
+            --r-heading-color: #ffffff;
+            --r-main-color: #e2e8f0;
+            --r-background-color: #111827;
+            --r-link-color: #38bdf8;
+            --r-selection-background-color: #38bdf8;
+            --r-code-font: 'Courier New', monospace;
+        }
+
+        .reveal {
+            font-family: var(--r-main-font);
+        }
+
+        .reveal h1,
+        .reveal h2,
+        .reveal h3,
+        .reveal h4,
+        .reveal h5,
+        .reveal h6 {
+            font-family: var(--r-heading-font);
+            font-weight: 800;
+            color: var(--r-heading-color);
+            text-shadow: none;
+        }
+
+        .reveal h2 {
+            border-bottom: 2px solid #374151;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .reveal .progress {
+            color: var(--r-link-color);
+        }
+
+        .reveal section {
+            text-align: left !important;
+        }
+
+        .reveal .center-slide,
+        .reveal .center-content {
+            text-align: center !important;
+        }
+
+        .reveal .slides section img {
+            border: none;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            border-radius: 0.75rem;
+            background-color: #1e293b;
+        }
+
+        .reveal ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .reveal li {
+            padding-left: 1.5em;
+            text-indent: -1.5em;
+            margin-bottom: 0.75rem;
+        }
+
+        .reveal li::before {
+            content: "→";
+            color: var(--r-link-color);
+            margin-right: 0.75rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- Title Slide -->
+            <section class="center-slide" data-background-color="#0f172a">
+                <h1
+                    class="text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-violet-500">
+                    RL in Robotics</h1>
+                <h2 class="text-4xl mt-4 !border-none">A Q-Learning Adventure in GridWorld</h2>
+                <h3 class="text-2xl mt-8 text-slate-300 font-semibold">Teaching an Agent to Navigate a Risky World</h3>
+                <div class="mt-16 text-slate-400">
+                    <p><strong>Team 01</strong></p>
+                    <p>Jeevan Hebbal Manjunath, Varun Karthik, Yeshwanth Reddy Gurreddy</p>
+                    <p><em>October 2024</em></p>
+                </div>
+            </section>
+
+            <!-- Table of Contents -->
+            <section>
+                <h2>📋 Agenda</h2>
+                <ul class="text-2xl leading-loose">
+                    <li class="fragment"><strong>Project Overview</strong> - What we built and why</li>
+                    <li class="fragment"><strong>The GridWorld Challenge</strong> - Our risky environment</li>
+                    <li class="fragment"><strong>Q-Learning Algorithm</strong> - How the agent learns</li>
+                    <li class="fragment"><strong>Implementation Details</strong> - Code structure and design</li>
+                    <li class="fragment"><strong>Hyperparameter Analysis</strong> - Tuning for optimal performance</li>
+                    <li class="fragment"><strong>Results & Visualizations</strong> - What the agent learned</li>
+                    <li class="fragment"><strong>Risk Adaptation</strong> - Behavior in dangerous scenarios</li>
+                    <li class="fragment"><strong>Key Insights</strong> - Lessons learned</li>
+                </ul>
+            </section>
+
+            <!-- Project Overview -->
+            <section>
+                <h2>🎯 Project Overview</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+                    <div>
+                        <h3 class="font-bold text-2xl mb-4 text-sky-400">What We Built</h3>
+                        <ul class="text-slate-300">
+                            <li class="fragment">Complete Q-Learning implementation</li>
+                            <li class="fragment">Stochastic GridWorld environment</li>
+                            <li class="fragment">Comprehensive hyperparameter toolkit</li>
+                            <li class="fragment">Rich visualization and plotting system</li>
+                            <li class="fragment">Risk adaptation analysis</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-2xl mb-4 text-sky-400">Why It Matters</h3>
+                        <ul class="text-slate-300">
+                            <li class="fragment">Understand how AI agents learn from experience</li>
+                            <li class="fragment">Explore the impact of uncertainty in robotics</li>
+                            <li class="fragment">Demonstrate adaptive behavior under risk</li>
+                            <li class="fragment">Provide insights for real-world applications</li>
+                        </ul>
+                    </div>
+                </div>
+                <div
+                    class="fragment mt-8 p-6 bg-slate-800 border border-slate-700 rounded-xl shadow-lg flex items-center gap-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"
+                        class="bi bi-lightbulb-fill text-yellow-300 flex-shrink-0" viewBox="0 0 16 16">
+                        <path
+                            d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13h-5a.5.5 0 0 1-.46-.302l-.761-1.77a1.964 1.964 0 0 0-.453-.618A5.984 5.984 0 0 1 2 6zm3 8.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1-.5-.5z" />
+                    </svg>
+                    <p class="font-semibold text-slate-200"><strong>Core Question:</strong> How can an agent learn
+                        intelligent behavior through pure trial and error in an unpredictable world?</p>
+                </div>
+            </section>
+
+            <!-- The GridWorld Environment -->
+            <section>
+                <h2>🌍 The GridWorld Challenge</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                    <div class="fragment">
+                        <h3 class="font-bold text-2xl mb-4 text-sky-400">Environment Setup</h3>
+                        <div class="grid grid-cols-4 gap-1 p-2 rounded-lg bg-slate-700 w-max mx-auto">
+                            <div
+                                class="h-24 w-24 flex items-center justify-center rounded bg-green-500 text-white font-bold text-xl shadow-md">
+                                +1</div>
+                            <div
+                                class="h-24 w-24 flex items-center justify-center rounded bg-slate-600 text-white font-bold text-2xl shadow-md">
+                            </div>
+                            <div
+                                class="h-24 w-24 flex items-center justify-center rounded bg-slate-600 text-white font-bold text-2xl shadow-md">
+                            </div>
+                            <div
+                                class="h-24 w-24 flex items-center justify-center rounded bg-slate-600 text-white font-bold text-2xl shadow-md">
+                            </div>
+                            <div
+                                class="h-24 w-24 flex items-center justify-center rounded bg-red-500 text-white font-bold text-xl shadow-md">
+                                -1</div>
+                            <div
+                                class="h-24 w-24 flex items-center justify-center rounded bg-slate-900 text-white font-bold text-lg shadow-md">
+                                WALL</div>
+                            <div
+                                class="h-24 w-24 flex items-center justify-center rounded bg-slate-600 text-white font-bold text-2xl shadow-md">
+                            </div>
+                            <div
+                                class="h-24 w-24 flex items-center justify-center rounded bg-slate-600 text-white font-bold text-2xl shadow-md">
+                            </div>
+                            <div
+                                class="h-24 w-24 flex items-center justify-center rounded bg-slate-600 text-white font-bold text-2xl shadow-md">
+                            </div>
+                            <div
+                                class="h-24 w-24 flex items-center justify-center rounded bg-slate-600 text-white font-bold text-2xl shadow-md">
+                            </div>
+                            <div
+                                class="h-24 w-24 flex items-center justify-center rounded bg-slate-600 text-white font-bold text-2xl shadow-md">
+                            </div>
+                            <div
+                                class="h-24 w-24 flex items-center justify-center rounded bg-blue-500 text-white font-bold text-lg shadow-md">
+                                START</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-2xl mb-4 text-sky-400">Key Features</h3>
+                        <ul class="text-slate-300">
+                            <li class="fragment"><span
+                                    class="bg-slate-700 px-2 py-1 rounded-md font-semibold text-sky-300">4×3 Grid</span>
+                                - 11 navigable states</li>
+                            <li class="fragment"><span
+                                    class="bg-slate-700 px-2 py-1 rounded-md font-semibold text-sky-300">Stochastic</span>
+                                - 80% intended, 20% drift</li>
+                            <li class="fragment"><span
+                                    class="bg-slate-700 px-2 py-1 rounded-md font-semibold text-sky-300">Goal
+                                    State</span> - +1.0 reward</li>
+                            <li class="fragment"><span
+                                    class="bg-slate-700 px-2 py-1 rounded-md font-semibold text-sky-300">Penalty</span>
+                                - Configurable penalty</li>
+                            <li class="fragment"><span
+                                    class="bg-slate-700 px-2 py-1 rounded-md font-semibold text-sky-300">Wall</span> -
+                                Blocks movement</li>
+                            <li class="fragment"><span
+                                    class="bg-slate-700 px-2 py-1 rounded-md font-semibold text-sky-300">Living
+                                    Cost</span> - -0.04 per step</li>
+                        </ul>
+                        <div
+                            class="fragment mt-6 p-4 bg-yellow-900/50 border border-yellow-700/80 rounded-xl shadow-lg flex items-center gap-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor"
+                                class="bi bi-exclamation-triangle-fill text-yellow-300 flex-shrink-0"
+                                viewBox="0 0 16 16">
+                                <path
+                                    d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                            </svg>
+                            <p class="font-semibold text-yellow-200"><strong>The Challenge:</strong> Learn optimal
+                                navigation despite unpredictable movement!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stochastic Actions -->
+            <section>
+                <h2>🎲 Stochastic Actions: The Twist</h2>
+                <div class="p-6 bg-slate-800 border-l-4 border-sky-400 rounded-r-lg">
+                    <h3 class="font-bold text-2xl mb-2 text-sky-300">Action Execution Model</h3>
+                    <p class="text-slate-300">When agent chooses action "North":</p>
+                    <ul class="mt-4 text-xl">
+                        <li><strong>80% chance:</strong> Actually moves North ✅</li>
+                        <li><strong>10% chance:</strong> Drifts West (left) ↩️</li>
+                        <li><strong>10% chance:</strong> Drifts East (right) ↪️</li>
+                    </ul>
+                </div>
+                <div class="grid grid-cols-2 gap-8 mt-8 fragment">
+                    <div>
+                        <h3 class="font-bold text-2xl mb-4 text-sky-400">Why Stochastic?</h3>
+                        <ul>
+                            <li>Models real-world uncertainty</li>
+                            <li>Simulates sensor noise</li>
+                            <li>Represents mechanical imprecision</li>
+                            <li>Forces robust learning</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-2xl mb-4 text-sky-400">Learning Implications</h3>
+                        <ul>
+                            <li>Agent must try actions multiple times</li>
+                            <li>Statistical learning becomes crucial</li>
+                            <li>Risk assessment is more complex</li>
+                            <li>Convergence is slower but more robust</li>
+                        </ul>
+                    </div>
+                </div>
+                <div
+                    class="fragment mt-8 p-6 bg-slate-800 border border-slate-700 rounded-xl shadow-lg flex items-center gap-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"
+                        class="bi bi-lightbulb-fill text-yellow-300 flex-shrink-0" viewBox="0 0 16 16">
+                        <path
+                            d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13h-5a.5.5 0 0 1-.46-.302l-.761-1.77a1.964 1.964 0 0 0-.453-.618A5.984 5.984 0 0 1 2 6zm3 8.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1-.5-.5z" />
+                    </svg>
+                    <p class="font-semibold text-slate-200">This uncertainty makes the problem much more realistic and
+                        challenging!</p>
+                </div>
+            </section>
+
+            <!-- Q-Learning Algorithm -->
+            <section>
+                <h2>🧠 Q-Learning: The Learning Brain</h2>
+                <div class="grid grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="font-bold text-2xl mb-4 text-sky-400">The "Cheat Sheet" Analogy</h3>
+                        <ul>
+                            <li class="fragment">Q-table = agent's "cheat sheet"</li>
+                            <li class="fragment">Stores value for every state-action pair</li>
+                            <li class="fragment">High Q-value = "This is a great move!"</li>
+                            <li class="fragment">Low Q-value = "Avoid this action!"</li>
+                            <li class="fragment">Initially all zeros (no knowledge)</li>
+                        </ul>
+                    </div>
+                    <div class="fragment">
+                        <h4 class="font-semibold mb-2 text-center text-slate-300">Q-Table Structure</h4>
+                        <pre class="w-full"><code class="language-json" data-trim data-noescape>
+                        {
+                          "State (1,1)": {"N": 0.45, "S": 0.12, "E": 0.67, "W": 0.23},
+                          "State (2,1)": {"N": 0.78, "S": 0.34, "E": 0.89, "W": 0.45},
+                          "State (3,1)": {"N": 0.91, "S": 0.56, "E": 0.95, "W": 0.67},
+                          "...": {}
+                        }
+                        </code></pre>
+                    </div>
+                </div>
+                <div
+                    class="fragment mt-12 p-6 bg-slate-800 border-t-4 border-violet-500 rounded-b-xl shadow-lg text-center">
+                    <p class="text-slate-300 text-xl font-semibold mb-2">Q-Learning Update Rule:</p>
+                    <p class="text-3xl font-mono text-white">Q(s,a) ← Q(s,a) + α[r + γ·max(Q(s',a')) - Q(s,a)]</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>🧮 Breaking Down the Q-Learning Formula</h2>
+                <div class="p-6 bg-slate-800 border-t-4 border-violet-500 rounded-b-xl shadow-lg text-center">
+                    <p class="text-3xl font-mono text-white">Q(s,a) ← Q(s,a) + α[r + γ·max(Q(s',a')) - Q(s,a)]</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                    <div class="fragment p-4 bg-slate-800 border border-slate-700 rounded-lg">
+                        <h4 class="text-xl font-bold text-sky-400">α (Alpha) - Learning Rate</h4>
+                        <p class="text-slate-400 mt-2">How much new information overrides old. <br> High α = Fast,
+                            unstable. Low α = Slow, stable.</p>
+                    </div>
+                    <div class="fragment p-4 bg-slate-800 border border-slate-700 rounded-lg">
+                        <h4 class="text-xl font-bold text-sky-400">γ (Gamma) - Discount Factor</h4>
+                        <p class="text-slate-400 mt-2">Importance of future rewards. <br>High γ = Long-term plan. Low γ
+                            = Short-term gain.</p>
+                    </div>
+                    <div class="fragment p-4 bg-slate-800 border border-slate-700 rounded-lg">
+                        <h4 class="text-xl font-bold text-sky-400">ε (Epsilon) - Exploration</h4>
+                        <p class="text-slate-400 mt-2">Random vs. optimal actions. <br>High ε = Explore. Low ε =
+                            Exploit.</p>
+                    </div>
+                </div>
+                <div
+                    class="fragment mt-8 p-6 bg-slate-800 border border-slate-700 rounded-xl shadow-lg flex items-center gap-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"
+                        class="bi bi-lightbulb-fill text-yellow-300 flex-shrink-0" viewBox="0 0 16 16">
+                        <path
+                            d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13h-5a.5.5 0 0 1-.46-.302l-.761-1.77a1.964 1.964 0 0 0-.453-.618A5.984 5.984 0 0 1 2 6zm3 8.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1-.5-.5z" />
+                    </svg>
+                    <p class="font-semibold text-slate-200">The magic is balancing immediate rewards (r) and future
+                        potential (γ·max Q), weighted by α, while exploring with ε!</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>⚡ Learning Rate (α) Analysis</h2>
+                <div class="w-full h-[600px] flex items-center justify-center">
+                    <img src="images/hyperparameter_analysis_alpha.png" alt="Learning Rate Analysis" class="max-h-full">
+                </div>
+                <div class="p-4 bg-green-900/50 border border-green-700/80 rounded-xl mt-4">
+                    <p class="font-semibold text-green-200"><strong>Optimal Range:</strong> α ∈ [0.1, 0.3] provides the
+                        best balance between convergence speed and stability.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>🔭 Discount Factor (γ) Analysis</h2>
+                <div class="w-full h-[600px] flex items-center justify-center">
+                    <img src="images/hyperparameter_analysis_gamma.png" alt="Discount Factor Analysis"
+                        class="max-h-full">
+                </div>
+                <div class="p-4 bg-green-900/50 border border-green-700/80 rounded-xl mt-4">
+                    <p class="font-semibold text-green-200"><strong>Critical Threshold:</strong> γ ≥ 0.9 is essential!
+                        Low γ values cause the agent to ignore the distant goal.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>🔍 Exploration Schedule (ε-decay) Analysis</h2>
+                <div class="w-full h-[600px] flex items-center justify-center">
+                    <img src="images/hyperparameter_analysis_epsilon_decay.png" alt="Epsilon Decay Analysis"
+                        class="max-h-full">
+                </div>
+                <div class="p-4 bg-green-900/50 border border-green-700/80 rounded-xl mt-4">
+                    <p class="font-semibold text-green-200"><strong>Sweet Spot:</strong> ε-decay ∈ [0.995, 0.999] allows
+                        thorough exploration while transitioning to exploitation at the right time.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>🌡️ Performance Heatmap: α vs γ</h2>
+                <div class="w-full h-[600px] flex items-center justify-center">
+                    <img src="images/hyperparameter_heatmap.png" alt="Performance Heatmap" class="max-h-full">
+                </div>
+                <div class="p-4 bg-green-900/50 border border-green-700/80 rounded-xl mt-4">
+                    <p class="font-semibold text-green-200"><strong>Key Finding:</strong> High γ (long-term planning)
+                        combined with a moderate α (stable learning) yields the best performance.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>📈 Convergence Analysis</h2>
+                <div class="w-full h-[600px] flex items-center justify-center">
+                    <img src="images/convergence.png" alt="Convergence Analysis" class="max-h-full">
+                </div>
+                <div
+                    class="fragment mt-8 p-6 bg-slate-800 border border-slate-700 rounded-xl shadow-lg flex items-center gap-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"
+                        class="bi bi-lightbulb-fill text-yellow-300 flex-shrink-0" viewBox="0 0 16 16">
+                        <path
+                            d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13h-5a.5.5 0 0 1-.46-.302l-.761-1.77a1.964 1.964 0 0 0-.453-.618A5.984 5.984 0 0 1 2 6zm3 8.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1-.5-.5z" />
+                    </svg>
+                    <p class="font-semibold text-slate-200"><strong>Insight:</strong> The agent learns <em>what to
+                            do</em> (policy) long before it knows <em>exactly how good</em> each action is (Q-values).
+                    </p>
+                </div>
+            </section>
+
+            <section>
+                <h2>🧠 Inside the Agent's Mind: Q-Table Heatmap</h2>
+                <div class="w-full h-[650px] flex items-center justify-center">
+                    <img src="images/q_table_heatmap.jpg" alt="Q-Table Heatmap" class="max-h-full">
+                </div>
+                <div class="p-4 bg-green-900/50 border border-green-700/80 rounded-xl mt-4">
+                    <p class="font-semibold text-green-200">This heatmap visualizes the agent's learned "cheat sheet,"
+                        showing the expected future reward for each action in every state.</p>
+                </div>
+            </section>
+
+            <section>
+                <h2>⚠️ Risk Adaptation: Behavior Under Danger</h2>
+                <div class="grid grid-cols-2 gap-8 items-start">
+                    <div class="fragment text-center">
+                        <h4 class="font-bold text-xl mb-4 text-slate-300">Standard Penalty (-1.0)</h4>
+                        <img src="https://placehold.co/400x300/1e293b/e2e8f0?text=Standard+Policy"
+                            alt="Standard Policy">
+                        <p class="mt-4 text-slate-400">Efficient path along edges</p>
+                    </div>
+                    <div class="fragment text-center">
+                        <h4 class="font-bold text-xl mb-4 text-slate-300">High-Risk Penalty (-200.0)</h4>
+                        <img src="https://placehold.co/400x300/1e293b/e2e8f0?text=High-Risk+Policy"
+                            alt="High Risk Policy">
+                        <p class="mt-4 text-slate-400">Extremely cautious, "hunker down" behavior</p>
+                    </div>
+                </div>
+                <div class="p-4 bg-green-900/50 border border-green-700/80 rounded-xl mt-8 fragment">
+                    <p class="font-semibold text-green-200"><strong>Adaptive Intelligence:</strong> The same algorithm
+                        develops a completely different personality when the stakes are higher!</p>
+                </div>
+            </section>
+
+            <!-- Conclusion -->
+            <section>
+                <h2>💡 Conclusion & Key Insights</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="fragment p-4 bg-slate-800/80 border border-slate-700 rounded-lg">
+                        <h4 class="text-xl font-bold text-sky-400">Hyperparameter Importance</h4>
+                        <p class="text-slate-400 mt-2">γ (discount factor) is critical. The right combination can give a
+                            10x performance boost.</p>
+                    </div>
+                    <div class="fragment p-4 bg-slate-800/80 border border-slate-700 rounded-lg">
+                        <h4 class="text-xl font-bold text-sky-400">Learning Dynamics</h4>
+                        <p class="text-slate-400 mt-2">The agent's strategy (policy) stabilizes long before its value
+                            estimates (Q-values) do.</p>
+                    </div>
+                    <div class="fragment p-4 bg-slate-800/80 border border-slate-700 rounded-lg">
+                        <h4 class="text-xl font-bold text-sky-400">Risk Adaptation</h4>
+                        <p class="text-slate-400 mt-2">Safety margins and cautious behavior emerge naturally as a
+                            response to high-risk environments.</p>
+                    </div>
+                </div>
+                <div class="fragment mt-12 p-8 bg-slate-800 border-t-4 border-violet-500 rounded-b-xl shadow-lg">
+                    <h3 class="text-3xl font-extrabold text-center text-slate-100">The Big Picture</h3>
+                    <p class="text-2xl text-center mt-4 text-slate-300 italic">"Through pure trial and error, an agent
+                        can develop sophisticated, adaptive strategies that mirror human-like decision-making."</p>
+                </div>
+            </section>
+
+            <!-- Appendix -->
+            <section>
+                <h2>📎 Appendix: Hyperparameter Effects Summary</h2>
+                <div class="center-content">
+                    <img src="images/hyperparameter_effects_summary.jpg" alt="Hyperparameter Effects Summary"
+                        class="max-h-[70vh]">
+                    <p class="mt-4 text-slate-400 text-sm">This conceptual overview shows the relative effects of each
+                        hyperparameter on learning dynamics.</p>
+                </div>
+            </section>
+
+            <!-- Thank You -->
+            <section class="center-slide" data-background-color="#0f172a">
+                <h1
+                    class="text-6xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-violet-500">
+                    Thank You!</h1>
+                <h2 class="text-4xl mt-4 !border-none">Questions & Discussion</h2>
+                <div class="mt-16 text-slate-300">
+                    <p class="mb-4">🔗 <strong>GitHub:</strong> <a href="https://github.com/Jeevan-HM/RL-in-Robotics"
+                            class="text-sky-400 hover:text-sky-300">github.com/Jeevan-HM/RL-in-Robotics</a></p>
+                    <p>📊 <strong>Report:</strong> Complete technical analysis in Report/Team01.pdf</p>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            center: true,
+            slideNumber: 'c/t',
+            transition: 'slide',
+            backgroundTransition: 'fade',
+            plugins: [RevealHighlight]
+        });
+    </script>
+</body>
+
+</html>

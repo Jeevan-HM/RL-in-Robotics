@@ -403,9 +403,11 @@ def run_training_session(
         cumulative_rewards.append(episode_reward)
         episode_lengths.append(episode_length)
 
-        if (episode + 1) % max(10, episodes) == 0:
+        # Print progress every 10% of episodes, but at least every 1000 episodes
+        print_interval = min(max(episodes // 10, 100), 1000)
+        if (episode + 1) % print_interval == 0:
             print(
-                f"Episode {episode + 1:,}/{episodes:,} | Epsilon: {agent.epsilon:.4f}",
+                f"Episode {episode + 1:,}/{episodes:,} ({(episode + 1) / episodes * 100:.1f}%) | Epsilon: {agent.epsilon:.4f}",
             )
 
     return TrainingResults(
@@ -422,7 +424,11 @@ def _run_hyperparameter_study(
 ) -> dict[float, TrainingResults]:
     """Run experiments for a given hyperparameter."""
     results = {}
-    for value in study_params.param_values:
+    total_values = len(study_params.param_values)
+
+    for idx, value in enumerate(study_params.param_values, 1):
+        print(f"  Testing {study_params.param_name} = {value} ({idx}/{total_values})")
+
         params = study_params.fixed_params.copy()
         params[study_params.param_name] = value
         hyperparameters = Hyperparameters(
@@ -441,6 +447,9 @@ def _run_hyperparameter_study(
             agent,
             study_params.episodes,
         )
+        print(f"    Completed {study_params.param_name} = {value}")
+
+    print(f"  Finished {study_params.param_name} analysis\n")
     return results
 
 
@@ -497,6 +506,7 @@ def analyze_hyperparameters(
         ),
     )
 
+    print("\nGenerating analysis plots...")
     plot_alpha_analysis(alpha_results, alpha_values, moving_average_window)
     plot_gamma_analysis(gamma_results, gamma_values, moving_average_window)
     plot_epsilon_decay_analysis(
@@ -505,6 +515,9 @@ def analyze_hyperparameters(
     plot_efficiency_summary(alpha_results, moving_average_window)
     plot_performance_heatmap(alpha_values, gamma_values)
 
+    print("\n" + "=" * 80)
+    print("HYPERPARAMETER ANALYSIS COMPLETE")
+    print("=" * 80)
     print_analysis_summary()
 
 
@@ -1546,6 +1559,11 @@ def main() -> None:
         moving_average_window,
     )
 
+    print("\n" + "=" * 80)
+    print("RUNNING HIGH-RISK SCENARIO TRAINING")
+    print("=" * 80)
+    print(f"Training agent with high penalty ({-10.0}) for {episodes:,} episodes...")
+
     high_penalty = -10.0
     env_high_penalty = GridWorld(penalty=high_penalty)
     hyperparameters = Hyperparameters(
@@ -1565,6 +1583,10 @@ def main() -> None:
         agent_high_penalty,
         episodes,
     )
+
+    print("\n" + "=" * 80)
+    print("TRAINING COMPLETE - ANALYZING RESULTS")
+    print("=" * 80)
     print_policy(agent_high_penalty, env_high_penalty)
     plot_q_table_heatmap(agent_high_penalty, env_high_penalty)
     plot_convergence(

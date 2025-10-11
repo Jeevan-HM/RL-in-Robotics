@@ -1,16 +1,20 @@
 # rollout_2d_viz.py
-import argparse, os, sys
-import numpy as np
-import matplotlib.pyplot as plt
+import argparse
+import os
+import sys
+
 import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+import numpy as np
 
 try:
     import imageio
 except Exception:
     imageio = None
 
-from envs.planar_nav import PlanarNavEnv
 from cac.algorithms import CACAgent
+from envs.planar_nav import PlanarNavEnv
+
 
 def fig_to_rgb_array(fig):
     """Return (H,W,3) uint8 across common backends (TkAgg/Qt5Agg/Agg)."""
@@ -42,61 +46,74 @@ def fig_to_rgb_array(fig):
         return rgba[:, :, :3]
     except Exception:
         pass
-    raise RuntimeError("Could not capture figure pixels; try MPLBACKEND=Agg if recording only.")
+    raise RuntimeError(
+        "Could not capture figure pixels; try MPLBACKEND=Agg if recording only."
+    )
+
 
 def draw_world(ax, env, artist_cache, draw_border=True):
     L = env.L
     ax.clear()
-    ax.set_aspect('equal', 'box')
+    ax.set_aspect("equal", "box")
 
     # World border (visible frame)
     if draw_border:
-        ax.add_patch(patches.Rectangle((-L*0.5, -L*0.5), L, L, fill=False, linewidth=1.5))
+        ax.add_patch(
+            patches.Rectangle((-L * 0.5, -L * 0.5), L, L, fill=False, linewidth=1.5)
+        )
 
     # Obstacles
     for cx, cy, h in env.obstacles:
-        ax.add_patch(patches.Rectangle((cx-h, cy-h), 2*h, 2*h, alpha=0.30))
+        ax.add_patch(patches.Rectangle((cx - h, cy - h), 2 * h, 2 * h, alpha=0.30))
 
     # Goal
-    goal = ax.plot(env.goal[0], env.goal[1], marker='*', markersize=12)[0]
+    goal = ax.plot(env.goal[0], env.goal[1], marker="*", markersize=12)[0]
 
     # Robot + heading
     robot = patches.Circle((env.p[0], env.p[1]), radius=env.R, alpha=0.8)
     ax.add_patch(robot)
-    head = ax.plot([env.p[0], env.p[0] + np.cos(env.theta)*env.R*2],
-                   [env.p[1], env.p[1] + np.sin(env.theta)*env.R*2])[0]
+    head = ax.plot(
+        [env.p[0], env.p[0] + np.cos(env.theta) * env.R * 2],
+        [env.p[1], env.p[1] + np.sin(env.theta) * env.R * 2],
+    )[0]
 
     # Rays
     ranges = env._rangefinder(env.p, env.theta)
-    angles = env.theta + np.linspace(-env.fov/2, env.fov/2, env.n_rays)
+    angles = env.theta + np.linspace(-env.fov / 2, env.fov / 2, env.n_rays)
     lines = []
     for r, ang in zip(ranges, angles):
         end = env.p + r * np.array([np.cos(ang), np.sin(ang)], dtype=np.float32)
-        ln, = ax.plot([env.p[0], end[0]], [env.p[1], end[1]], linewidth=0.8, alpha=0.5)
+        (ln,) = ax.plot(
+            [env.p[0], end[0]], [env.p[1], end[1]], linewidth=0.8, alpha=0.5
+        )
         lines.append(ln)
 
     # Path
-    path, = ax.plot([env.p[0]], [env.p[1]])
+    (path,) = ax.plot([env.p[0]], [env.p[1]])
 
     artist_cache.update(dict(robot=robot, head=head, lines=lines, path=path, goal=goal))
 
+
 def update_world(ax, env, artist_cache, path_pts):
-    robot = artist_cache['robot']
-    head  = artist_cache['head']
-    lines = artist_cache['lines']
-    path  = artist_cache['path']
+    robot = artist_cache["robot"]
+    head = artist_cache["head"]
+    lines = artist_cache["lines"]
+    path = artist_cache["path"]
 
     robot.center = (env.p[0], env.p[1])
-    head.set_data([env.p[0], env.p[0] + np.cos(env.theta)*env.R*2],
-                  [env.p[1], env.p[1] + np.sin(env.theta)*env.R*2])
+    head.set_data(
+        [env.p[0], env.p[0] + np.cos(env.theta) * env.R * 2],
+        [env.p[1], env.p[1] + np.sin(env.theta) * env.R * 2],
+    )
 
     ranges = env._rangefinder(env.p, env.theta)
-    angles = env.theta + np.linspace(-env.fov/2, env.fov/2, env.n_rays)
+    angles = env.theta + np.linspace(-env.fov / 2, env.fov / 2, env.n_rays)
     for ln, r, ang in zip(lines, ranges, angles):
         end = env.p + r * np.array([np.cos(ang), np.sin(ang)], dtype=np.float32)
         ln.set_data([env.p[0], end[0]], [env.p[1], end[1]])
 
-    path.set_data(path_pts[:,0], path_pts[:,1])
+    path.set_data(path_pts[:, 0], path_pts[:, 1])
+
 
 def follow_robot(ax, env, half_window):
     """Center a fixed-size window (2*half_window) around the robot."""
@@ -104,35 +121,57 @@ def follow_robot(ax, env, half_window):
     ax.set_xlim(x - half_window, x + half_window)
     ax.set_ylim(y - half_window, y + half_window)
 
+
 def smart_pan(ax, env, margin=1.0):
     """Pan only when the robot nears the edge of the current view."""
-    xmin, xmax = ax.get_xlim(); ymin, ymax = ax.get_ylim()
+    xmin, xmax = ax.get_xlim()
+    ymin, ymax = ax.get_ylim()
     x, y = env.p
-    w = xmax - xmin; h = ymax - ymin
+    w = xmax - xmin
+    h = ymax - ymin
     moved = False
-    if x < xmin + margin: xmin, xmax = x - margin, x - margin + w; moved = True
-    if x > xmax - margin: xmin, xmax = x + margin - w, x + margin; moved = True
-    if y < ymin + margin: ymin, ymax = y - margin, y - margin + h; moved = True
-    if y > ymax - margin: ymin, ymax = y + margin - h, y + margin; moved = True
+    if x < xmin + margin:
+        xmin, xmax = x - margin, x - margin + w
+        moved = True
+    if x > xmax - margin:
+        xmin, xmax = x + margin - w, x + margin
+        moved = True
+    if y < ymin + margin:
+        ymin, ymax = y - margin, y - margin + h
+        moved = True
+    if y > ymax - margin:
+        ymin, ymax = y + margin - h, y + margin
+        moved = True
     if moved:
-        ax.set_xlim(xmin, xmax); ax.set_ylim(ymin, ymax)
+        ax.set_xlim(xmin, xmax)
+        ax.set_ylim(ymin, ymax)
 
-def run_episode(env, agent, deterministic=True, seed=None, save_writer=None,
-                follow=False, view_half=None, smart=False):
+
+def run_episode(
+    env,
+    agent,
+    deterministic=True,
+    seed=None,
+    save_writer=None,
+    follow=False,
+    view_half=None,
+    smart=False,
+):
     artist_cache = {}
-    fig, ax = plt.subplots(figsize=(6,6))
+    fig, ax = plt.subplots(figsize=(6, 6))
 
     # Reset BEFORE first draw
     o, _ = env.reset(seed=seed)
 
     # Initial axes: whole world (static)
     L = env.L
-    ax.set_xlim(-L*0.5, L*0.5)
-    ax.set_ylim(-L*0.5, L*0.5)
+    ax.set_xlim(-L * 0.5, L * 0.5)
+    ax.set_ylim(-L * 0.5, L * 0.5)
 
     draw_world(ax, env, artist_cache, draw_border=True)
     plt.tight_layout()
-    fig.canvas.draw(); plt.pause(0.001)
+    fig.canvas.draw()
+    plt.pause(0.001)
 
     done = False
     ep_ret = 0.0
@@ -151,55 +190,93 @@ def run_episode(env, agent, deterministic=True, seed=None, save_writer=None,
         if follow and view_half is not None:
             follow_robot(ax, env, view_half)
         elif smart:
-            smart_pan(ax, env, margin=max(0.5, env.R*2))
+            smart_pan(ax, env, margin=max(0.5, env.R * 2))
 
-        fig.canvas.draw(); plt.pause(0.001)
+        fig.canvas.draw()
+        plt.pause(0.001)
 
         if save_writer is not None:
             frame = fig_to_rgb_array(fig)
             save_writer.append_data(frame)
 
-    return ep_ret, len(pts)-1
+    return ep_ret, len(pts) - 1
+
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--ckpt', type=str, required=True, help='Path to saved model .pt')
-    ap.add_argument('--episodes', type=int, default=1, help='How many episodes to play/record')
-    ap.add_argument('--seed', type=int, default=1)
-    ap.add_argument('--stage', choices=['goal','safety'], default='goal', help='Which reward to report')
-    ap.add_argument('--stochastic', action='store_true', help='Use sampling instead of deterministic mean action')
-    ap.add_argument('--save', type=str, default=None, help='Optional path to .mp4 or .gif to record')
-    ap.add_argument('--fps', type=int, default=30)
+    ap.add_argument("--ckpt", type=str, required=True, help="Path to saved model .pt")
+    ap.add_argument(
+        "--episodes", type=int, default=1, help="How many episodes to play/record"
+    )
+    ap.add_argument("--seed", type=int, default=1)
+    ap.add_argument(
+        "--stage",
+        choices=["goal", "safety"],
+        default="goal",
+        help="Which reward to report",
+    )
+    ap.add_argument(
+        "--stochastic",
+        action="store_true",
+        help="Use sampling instead of deterministic mean action",
+    )
+    ap.add_argument(
+        "--save", type=str, default=None, help="Optional path to .mp4 or .gif to record"
+    )
+    ap.add_argument("--fps", type=int, default=30)
 
     # New: camera options
-    ap.add_argument('--follow', action='store_true', help='Center a fixed-size view on the robot')
-    ap.add_argument('--view', type=float, default=None, help='Half window size for --follow (e.g., 6.0)')
-    ap.add_argument('--smart_pan', action='store_true', help='Pan only when robot nears the edge')
+    ap.add_argument(
+        "--follow", action="store_true", help="Center a fixed-size view on the robot"
+    )
+    ap.add_argument(
+        "--view",
+        type=float,
+        default=None,
+        help="Half window size for --follow (e.g., 6.0)",
+    )
+    ap.add_argument(
+        "--smart_pan", action="store_true", help="Pan only when robot nears the edge"
+    )
 
     args = ap.parse_args()
 
     # load agent + env
     agent, _ = CACAgent.load(args.ckpt)
-    
+
     # Try to detect if this is our enhanced model by checking observation dimension
     # Our balanced model expects 26-dim observations, original expects 23-dim
     try:
         # Create test environment with enhanced observations
-        test_env = PlanarNavEnv(seed=args.seed, safety_margin=0.25, alpha=0.93, 
-                               enhanced_obs=True, n_rays=19, fov_deg=130)
+        test_env = PlanarNavEnv(
+            seed=args.seed,
+            safety_margin=0.25,
+            alpha=0.93,
+            enhanced_obs=True,
+            n_rays=19,
+            fov_deg=130,
+        )
         test_obs, _ = test_env.reset()
         agent.act(test_obs)  # This will fail if dimensions don't match
-        
+
         # If we get here, use enhanced environment
-        env = PlanarNavEnv(seed=args.seed, safety_margin=0.25, alpha=0.93, 
-                          enhanced_obs=True, n_rays=19, fov_deg=130)
+        env = PlanarNavEnv(
+            seed=args.seed,
+            safety_margin=0.25,
+            alpha=0.93,
+            enhanced_obs=True,
+            n_rays=19,
+            fov_deg=130,
+        )
         print(f"✅ Using enhanced environment (obs_dim={test_obs.shape[0]})")
-        
+
     except Exception:
         # Fall back to original environment
         env = PlanarNavEnv(seed=args.seed, enhanced_obs=False)
-        print(f"📝 Using original environment (obs_dim={env.observation_space.shape[0]})")
-    
+        print(
+            f"📝 Using original environment (obs_dim={env.observation_space.shape[0]})"
+        )
+
     env.set_stage(args.stage)
 
     det = not args.stochastic
@@ -208,12 +285,17 @@ def main():
     writer = None
     if args.save is not None:
         if imageio is None:
-            print("imageio not found; install imageio & imageio-ffmpeg to record video.", file=sys.stderr)
+            print(
+                "imageio not found; install imageio & imageio-ffmpeg to record video.",
+                file=sys.stderr,
+            )
             sys.exit(2)
         try:
             writer = imageio.get_writer(args.save, fps=args.fps)
         except Exception as e:
-            print(f"Failed to open video writer for '{args.save}': {e}", file=sys.stderr)
+            print(
+                f"Failed to open video writer for '{args.save}': {e}", file=sys.stderr
+            )
             sys.exit(2)
 
     # Auto default view for follow mode
@@ -226,8 +308,14 @@ def main():
         R = []
         for ep in range(args.episodes):
             ret, length = run_episode(
-                env, agent, deterministic=det, seed=args.seed+ep, save_writer=writer,
-                follow=args.follow, view_half=view_half, smart=args.smart_pan
+                env,
+                agent,
+                deterministic=det,
+                seed=args.seed + ep,
+                save_writer=writer,
+                follow=args.follow,
+                view_half=view_half,
+                smart=args.smart_pan,
             )
             R.append(ret)
             print(f"Episode {ep:03d} | Return={ret:.3f}, Length={length}")
@@ -237,5 +325,6 @@ def main():
         if writer is not None:
             writer.close()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

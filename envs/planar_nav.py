@@ -38,6 +38,9 @@ class PlanarNavEnv(gym.Env):
 
         self.L = float(L)
         self.N_obs = int(N_obs)
+        self.render_mode = render_mode
+        self._fig = None
+        self._ax = None
         self.obs_side_min = float(obs_side_min)
         self.obs_side_max = float(obs_side_max)
         self.R = float(robot_R)
@@ -319,4 +322,72 @@ class PlanarNavEnv(gym.Env):
         self._reward_mode = mode
 
     def render(self):
-        pass
+        """Render the environment state."""
+        if self.render_mode is None:
+            return
+
+        try:
+            import matplotlib.patches as patches
+            import matplotlib.pyplot as plt
+        except ImportError:
+            print("Warning: matplotlib not available for rendering")
+            return
+
+        # Initialize plot if not exists
+        if self._fig is None:
+            plt.ion()  # Turn on interactive mode
+            self._fig, self._ax = plt.subplots(figsize=(8, 8))
+            self._ax.set_xlim(-self.L, self.L)
+            self._ax.set_ylim(-self.L, self.L)
+            self._ax.set_aspect("equal")
+            self._ax.grid(True, alpha=0.3)
+            self._ax.set_title("CAC Agent Navigation")
+            self._ax.set_xlabel("X")
+            self._ax.set_ylabel("Y")
+
+        # Clear previous frame
+        self._ax.clear()
+        self._ax.set_xlim(-self.L, self.L)
+        self._ax.set_ylim(-self.L, self.L)
+        self._ax.set_aspect("equal")
+        self._ax.grid(True, alpha=0.3)
+
+        # Draw obstacles
+        for obs in self.obstacles:
+            circle = patches.Circle(obs, 2.0, color="red", alpha=0.7)
+            self._ax.add_patch(circle)
+
+        # Draw goal
+        goal_circle = patches.Circle(self.goal, 1.5, color="green", alpha=0.5)
+        self._ax.add_patch(goal_circle)
+
+        # Draw agent
+        agent_circle = patches.Circle(self.p, 0.5, color="blue", alpha=0.8)
+        self._ax.add_patch(agent_circle)
+
+        # Draw CBF safety boundary (approximate)
+        cbf_val = self.h(self.p)  # Control Barrier Function
+        if cbf_val <= 0:
+            # Agent is in unsafe region
+            safety_circle = patches.Circle(
+                self.p, 1.0, fill=False, edgecolor="red", linewidth=3, linestyle="--"
+            )
+            self._ax.add_patch(safety_circle)
+
+        # Add info text
+        info_text = f"Position: ({self.p[0]:.2f}, {self.p[1]:.2f})\n"
+        info_text += f"CBF: {cbf_val:.3f}\n"
+        info_text += f"CLF: {self.l(self.p):.3f}"  # Control Lyapunov Function
+        self._ax.text(
+            -self.L + 1,
+            self.L - 2,
+            info_text,
+            fontsize=10,
+            bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.8),
+        )
+
+        plt.draw()
+        plt.pause(0.01)  # Small pause for animation
+
+        if self.render_mode == "human":
+            return

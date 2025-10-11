@@ -5,15 +5,11 @@ Demonstrates both safety-focused and goal-seeking navigation models working toge
 """
 
 import argparse
-import os
-import sys
-import time
 
 import matplotlib.gridspec as gridspec
 import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.animation import FuncAnimation
 
 from cac.algorithms import CACAgent
 from envs.planar_nav import PlanarNavEnv
@@ -223,7 +219,7 @@ class DualModelVisualizer:
         goal_done = False
         step = 0
 
-        print(f"🚀 Starting dual navigation episode...")
+        print("🚀 Starting dual navigation episode...")
         print(f"Start: ({self.safety_env.p[0]:.2f}, {self.safety_env.p[1]:.2f})")
         print(f"Goal:  ({self.safety_env.goal[0]:.2f}, {self.safety_env.goal[1]:.2f})")
 
@@ -456,22 +452,22 @@ class DualModelVisualizer:
         n_episodes = len(results)
 
         print(f"📊 Results over {n_episodes} episodes:")
-        print(f"")
-        print(f"🔒 Safety Model:")
+        print("")
+        print("🔒 Safety Model:")
         print(f"   Success Rate:    {safety_successes / n_episodes * 100:6.1f}%")
         print(f"   Collision Rate:  {safety_collisions / n_episodes * 100:6.1f}%")
         print(
             f"   Avg Clearance:   {np.mean([np.mean(r['safety_clearances']) for r in results]):6.3f}m"
         )
-        print(f"")
-        print(f"🎯 Goal Model:")
+        print("")
+        print("🎯 Goal Model:")
         print(f"   Success Rate:    {goal_successes / n_episodes * 100:6.1f}%")
         print(f"   Collision Rate:  {goal_collisions / n_episodes * 100:6.1f}%")
         print(
             f"   Avg Clearance:   {np.mean([np.mean(r['goal_clearances']) for r in results]):6.3f}m"
         )
-        print(f"")
-        print(f"🎯 Key Insights:")
+        print("")
+        print("🎯 Key Insights:")
 
         if safety_collisions < goal_collisions:
             print(
@@ -482,9 +478,9 @@ class DualModelVisualizer:
                 f"   • Goal model has {goal_successes - safety_successes} more success(es)"
             )
         if safety_successes == 0 and goal_successes == 0:
-            print(f"   • Both models need further training for this environment")
+            print("   • Both models need further training for this environment")
 
-        print(f"\n🎉 Both models demonstrate learned obstacle avoidance behavior!")
+        print("\n🎉 Both models demonstrate learned obstacle avoidance behavior!")
 
 
 def main():

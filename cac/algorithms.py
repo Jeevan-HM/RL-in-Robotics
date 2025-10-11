@@ -1,5 +1,6 @@
-from dataclasses import dataclass, asdict
-from typing import Optional, Dict, Any
+from dataclasses import asdict, dataclass
+from typing import Any, Dict, Optional
+
 import numpy as np
 import torch
 import torch.nn as nn
@@ -9,11 +10,13 @@ from torch.optim import Adam
 from .nets import TanhGaussianPolicy, TwinQ
 from .replay import ReplayBuffer
 
+
 def soft_update(target: nn.Module, source: nn.Module, tau: float):
     with torch.no_grad():
         for p_t, p in zip(target.parameters(), source.parameters()):
             p_t.data.mul_(1 - tau)
             p_t.data.add_(tau * p.data)
+
 
 @dataclass
 class CACConfig:
@@ -23,7 +26,7 @@ class CACConfig:
     gamma: float = 0.99
     actor_lr: float = 3e-4
     critic_lr: float = 3e-4
-    alpha_ent: float = 0.2  # SAC entropy coefficient
+    alpha_ent: float = 0.1  # Reduced entropy for more focused behavior
     batch_size: int = 256
     replay_size: int = 1_000_000
     start_steps: int = 1000
@@ -34,14 +37,17 @@ class CACConfig:
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
 
     stage: str = "safety"
-    restrict_cos_min: float = -0.25
+    restrict_cos_min: float = -0.1  # Stricter constraint (was -0.25)
     max_grad_norm: float = 10.0
+
 
 class CACAgent(nn.Module):
     def __init__(self, cfg: CACConfig):
         super().__init__()
         self.cfg = cfg
-        self.policy = TanhGaussianPolicy(cfg.obs_dim, cfg.act_dim, hidden=cfg.hidden).to(cfg.device)
+        self.policy = TanhGaussianPolicy(
+            cfg.obs_dim, cfg.act_dim, hidden=cfg.hidden
+        ).to(cfg.device)
         self.q1_s = TwinQ(cfg.obs_dim, cfg.act_dim, hidden=cfg.hidden).to(cfg.device)
         self.q1_s_t = TwinQ(cfg.obs_dim, cfg.act_dim, hidden=cfg.hidden).to(cfg.device)
         self.q1_s_t.load_state_dict(self.q1_s.state_dict())
@@ -56,7 +62,9 @@ class CACAgent(nn.Module):
         self.replay = ReplayBuffer(cfg.obs_dim, cfg.act_dim, cfg.replay_size)
 
     def act(self, obs: np.ndarray, deterministic=False) -> np.ndarray:
-        obs_t = torch.tensor(obs, dtype=torch.float32, device=self.cfg.device).unsqueeze(0)
+        obs_t = torch.tensor(
+            obs, dtype=torch.float32, device=self.cfg.device
+        ).unsqueeze(0)
         with torch.no_grad():
             if deterministic:
                 mean, _ = self.policy(obs_t)
@@ -67,10 +75,14 @@ class CACAgent(nn.Module):
 
     def update_critics(self, batch: Dict[str, np.ndarray], stage: str):
         cfg = self.cfg
-        obs  = torch.tensor(batch["obs"], dtype=torch.float32, device=cfg.device)
-        act  = torch.tensor(batch["act"], dtype=torch.float32, device=cfg.device)
-        rew  = torch.tensor(batch["rew"], dtype=torch.float32, device=cfg.device).unsqueeze(-1)
-        done = torch.tensor(batch["done"], dtype=torch.float32, device=cfg.device).unsqueeze(-1)
+        obs = torch.tensor(batch["obs"], dtype=torch.float32, device=cfg.device)
+        act = torch.tensor(batch["act"], dtype=torch.float32, device=cfg.device)
+        rew = torch.tensor(
+            batch["rew"], dtype=torch.float32, device=cfg.device
+        ).unsqueeze(-1)
+        done = torch.tensor(
+            batch["done"], dtype=torch.float32, device=cfg.device
+        ).unsqueeze(-1)
         obs2 = torch.tensor(batch["obs2"], dtype=torch.float32, device=cfg.device)
 
         with torch.no_grad():
@@ -116,7 +128,12 @@ class CACAgent(nn.Module):
         return {"loss_pi": float(loss_pi.item())}
 
     def _flatten_grads(self, params):
-        return torch.cat([p.grad.view(-1) if p.grad is not None else torch.zeros_like(p.view(-1)) for p in params])
+        return torch.cat(
+            [
+                p.grad.view(-1) if p.grad is not None else torch.zeros_like(p.view(-1))
+                for p in params
+            ]
+        )
 
     def _set_grads_from_flat(self, params, vec):
         offset = 0
@@ -124,7 +141,7 @@ class CACAgent(nn.Module):
             n = p.numel()
             if p.grad is None:
                 p.grad = torch.zeros_like(p)
-            p.grad.copy_(vec[offset:offset+n].view_as(p))
+            p.grad.copy_(vec[offset : offset + n].view_as(p))
             offset += n
 
     def update_actor_restricted(self, batch: Dict[str, np.ndarray]):
@@ -147,14 +164,14 @@ class CACAgent(nn.Module):
 
         dot = torch.dot(g1, g2)
         if dot.item() < 0.0:
-            e = g2 - (dot / (g1.norm()**2 + 1e-12)) * g1
+            e = g2 - (dot / (g1.norm() ** 2 + 1e-12)) * g1
         else:
             e = g2
 
         cos = torch.dot(e, g1) / (e.norm() * g1.norm() + 1e-12)
         if cos.item() < cfg.restrict_cos_min:
             c_min = cfg.restrict_cos_min
-            g1n2 = g1.norm()**2 + 1e-12
+            g1n2 = g1.norm() ** 2 + 1e-12
             lam = (c_min * e.norm() * g1.norm() - torch.dot(e, g1)) / g1n2
             e = e + lam * g1
 
@@ -167,7 +184,9 @@ class CACAgent(nn.Module):
         self.pi_optim.step()
 
         return {
-            "cos_e_g1": float((torch.dot(e, g1) / (e.norm() * g1.norm() + 1e-12)).item()),
+            "cos_e_g1": float(
+                (torch.dot(e, g1) / (e.norm() * g1.norm() + 1e-12)).item()
+            ),
             "g2_norm": float(g2.norm().item()),
             "e_norm": float(e.norm().item()),
         }

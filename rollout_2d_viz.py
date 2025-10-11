@@ -180,7 +180,26 @@ def main():
 
     # load agent + env
     agent, _ = CACAgent.load(args.ckpt)
-    env = PlanarNavEnv(seed=args.seed)
+    
+    # Try to detect if this is our enhanced model by checking observation dimension
+    # Our balanced model expects 26-dim observations, original expects 23-dim
+    try:
+        # Create test environment with enhanced observations
+        test_env = PlanarNavEnv(seed=args.seed, safety_margin=0.25, alpha=0.93, 
+                               enhanced_obs=True, n_rays=19, fov_deg=130)
+        test_obs, _ = test_env.reset()
+        agent.act(test_obs)  # This will fail if dimensions don't match
+        
+        # If we get here, use enhanced environment
+        env = PlanarNavEnv(seed=args.seed, safety_margin=0.25, alpha=0.93, 
+                          enhanced_obs=True, n_rays=19, fov_deg=130)
+        print(f"✅ Using enhanced environment (obs_dim={test_obs.shape[0]})")
+        
+    except Exception:
+        # Fall back to original environment
+        env = PlanarNavEnv(seed=args.seed, enhanced_obs=False)
+        print(f"📝 Using original environment (obs_dim={env.observation_space.shape[0]})")
+    
     env.set_stage(args.stage)
 
     det = not args.stochastic

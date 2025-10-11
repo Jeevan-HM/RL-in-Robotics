@@ -1,0 +1,62 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{Xie2025CAC}
+\citation{Guerrier2024Survey}
+\citation{Ranjan2024BarrierShaping}
+\citation{Kalaria2024DOB}
+\citation{Harms2024NeuralCBF}
+\citation{Xie2025CAC}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {II}Problem Context and Formulation}{1}{section.2}\protected@file@percent }
+\citation{Xie2025CAC}
+\citation{Xie2025CAC}
+\citation{Xie2025CAC}
+\citation{Xie2025CAC}
+\citation{Xie2025CAC}
+\citation{Xie2025CAC}
+\citation{Xie2025CAC}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Conceptual diagram of the two-stage CAC algorithm, adapted from \cite  {Xie2025CAC}. Stage 1 trains a safety critic ($Q_1$) using a CBF-based reward ($r_1$). Stage 2 trains a task critic ($Q_2$) on a task reward ($r_2$), using a restricted gradient to update the actor without compromising the safety guarantees learned in Stage 1.}}{2}{figure.1}\protected@file@percent }
+\newlabel{fig:framework}{{1}{2}{Conceptual diagram of the two-stage CAC algorithm, adapted from \cite {Xie2025CAC}. Stage 1 trains a safety critic ($Q_1$) using a CBF-based reward ($r_1$). Stage 2 trains a task critic ($Q_2$) on a task reward ($r_2$), using a restricted gradient to update the actor without compromising the safety guarantees learned in Stage 1}{figure.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {III}Methodology: The Certificated Actor--Critic Framework}{2}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Two-Stage Hierarchical RL}{2}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Safety Critic via CBF-Derived Reward}{2}{subsection.3.2}\protected@file@percent }
+\newlabel{eq:cbf-reward}{{1}{2}{Safety Critic via CBF-Derived Reward}{equation.1}{}}
+\@writefile{loa}{\contentsline {algorithm}{\numberline {1}{\ignorespaces High-level sketch of the two-stage CAC algorithm, adapted from \cite  {Xie2025CAC}}}{2}{algorithm.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Goal-Reaching and Restricted Policy Update}{2}{subsection.3.3}\protected@file@percent }
+\newlabel{eq:clf-reward}{{2}{2}{Goal-Reaching and Restricted Policy Update}{equation.2}{}}
+\newlabel{eq:restricted}{{3}{2}{Goal-Reaching and Restricted Policy Update}{equation.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}Planned Implementation}{2}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Preliminary Results}{2}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-A}}Additional Diagnostics: Balanced Model and Dual-Model Comparison}{2}{subsection.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {IV-B}}Observations and Analysis}{2}{subsection.4.2}\protected@file@percent }
+\citation{Xie2025CAC}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Stage 1 (Safety-Only) training logs. The stabilization of episode returns/lengths and convergence of losses indicate a stable learning process.}}{3}{figure.2}\protected@file@percent }
+\newlabel{fig:safety_training}{{2}{3}{Stage 1 (Safety-Only) training logs. The stabilization of episode returns/lengths and convergence of losses indicate a stable learning process}{figure.2}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Goal-Only baseline training logs. Goal distance improves, but collision rates remain high, indicating unsafe behavior when optimizing only the task objective.}}{3}{figure.3}\protected@file@percent }
+\newlabel{fig:goal_training}{{3}{3}{Goal-Only baseline training logs. Goal distance improves, but collision rates remain high, indicating unsafe behavior when optimizing only the task objective}{figure.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Quantitative summary for diagnostics in Figs.~\ref {fig:balanced_model_perf} and \ref {fig:safety_vs_goal_final}.}}{3}{table.1}\protected@file@percent }
+\newlabel{tab:diagnostics_summary}{{I}{3}{Quantitative summary for diagnostics in Figs.~\ref {fig:balanced_model_perf} and \ref {fig:safety_vs_goal_final}}{table.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Qualitative trajectories for Stage 1 (safety-only) policy. The agent generates smooth, collision-averse paths toward the goal in cluttered environments.}}{3}{figure.4}\protected@file@percent }
+\newlabel{fig:safety_only}{{4}{3}{Qualitative trajectories for Stage 1 (safety-only) policy. The agent generates smooth, collision-averse paths toward the goal in cluttered environments}{figure.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces \textbf  {Balanced (naive reward mix) model over 20 episodes.} Success: \textbf  {20\%}; collision: \textbf  {80\%}; average length $\approx 100\pm 8.5$ steps. Average episode clearance: $0.347\pm 0.065$\,m (collision threshold $0.168$\,m; safety margin $0.250$\,m). Relative to a random policy (collisions $\sim $90--95\%), this is a $\sim $15~pp improvement but still far from deployable.}}{3}{figure.5}\protected@file@percent }
+\newlabel{fig:balanced_model_perf}{{5}{3}{\textbf {Balanced (naive reward mix) model over 20 episodes.} Success: \textbf {20\%}; collision: \textbf {80\%}; average length $\approx 100\pm 8.5$ steps. Average episode clearance: $0.347\pm 0.065$\,m (collision threshold $0.168$\,m; safety margin $0.250$\,m). Relative to a random policy (collisions $\sim $90--95\%), this is a $\sim $15~pp improvement but still far from deployable}{figure.5}{}}
+\citation{Guerrier2024Survey}
+\citation{Harms2024NeuralCBF}
+\citation{Kalaria2024DOB}
+\citation{Ranjan2024BarrierShaping}
+\citation{Harms2024NeuralCBF}
+\bibstyle{IEEEtran}
+\bibcite{Xie2025CAC}{1}
+\bibcite{Guerrier2024Survey}{2}
+\bibcite{Ranjan2024BarrierShaping}{3}
+\bibcite{Kalaria2024DOB}{4}
+\bibcite{Harms2024NeuralCBF}{5}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces \textbf  {Dual-model visualization over 10 episodes (Safety vs.\ Goal).} \emph  {Safety} model: success \textbf  {50\%}, collision \textbf  {30\%}, avg.\ clearance \textbf  {1.029\,m}. \emph  {Goal} model: success \textbf  {30\%}, collision \textbf  {70\%}, avg.\ clearance \textbf  {0.869\,m}. The safety model logs \textbf  {4 fewer collisions} and larger clearance.}}{4}{figure.6}\protected@file@percent }
+\newlabel{fig:safety_vs_goal_final}{{6}{4}{\textbf {Dual-model visualization over 10 episodes (Safety vs.\ Goal).} \emph {Safety} model: success \textbf {50\%}, collision \textbf {30\%}, avg.\ clearance \textbf {1.029\,m}. \emph {Goal} model: success \textbf {30\%}, collision \textbf {70\%}, avg.\ clearance \textbf {0.869\,m}. The safety model logs \textbf {4 fewer collisions} and larger clearance}{figure.6}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {V}Brief Summary of Reported Results \& Our Evaluation Plan}{4}{section.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VI}Bottlenecks and Ultimate Challenges}{4}{section.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {VII}Conclusion}{4}{section.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{References}{4}{section*.2}\protected@file@percent }
+\gdef \@abspage@last{4}

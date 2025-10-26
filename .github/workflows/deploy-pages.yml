@@ -1,6 +1,6 @@
 # This is the full content for: .github/workflows/deploy-pages.yml
 
-name: Assignment Q Learning By Neural Network
+name: Deploy Combined Pages with README
 
 on:
   # Runs on pushes to the main branch
@@ -14,8 +14,18 @@ jobs:
     steps:
       - name: Checkout main branch content
         uses: actions/checkout@v4
+        with:
+          # Fetches all history, needed for the markdown-to-html action
+          fetch-depth: 0 
 
-      - name: Checkout 'assignment_q_nn' branch into 'assignment' folder
+      - name: Convert README.md to index.html
+        uses: avto-dev/github-markdown-action@v2
+        with:
+          input_file: 'README.md'
+          output_file: 'index.html'
+          style: 'github'
+
+      - name: Checkout 'assignment_q_nn' branch into 'assignment_q_nn' folder
         uses: actions/checkout@v4
         with:
           # This is your other branch
@@ -31,7 +41,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload the entire root directory, which now contains
-          # both main content and the new 'assignment' folder
+          # the new index.html and the 'assignment_q_nn' folder
           path: '.' 
 
   deploy:

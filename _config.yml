@@ -1,0 +1,3 @@
+theme: jekyll-theme-minimal
+title: RL in Robotics: A Q-Learning Adventure
+description: A deep dive into Q-learning in a stochastic GridWorld.

@@ -31,7 +31,7 @@ jobs:
           
       # --- THIS IS THE FIX ---
       - name: Fix _site permissions
-        run: chmod -R 777 ./_site 
+        run: sudo chmod -R 777 ./_site 
       # ------------------------
           
       - name: Checkout 'assignment_q_nn' branch

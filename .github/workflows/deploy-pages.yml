@@ -3,15 +3,11 @@
 name: Deploy Pages with Jekyll
 
 on:
-  # Runs on pushes to the main branch
   push:
     branches:
       - main
-      
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Sets permissions for GITHUB_TOKEN
 permissions:
   contents: read
   pages: write
@@ -28,27 +24,28 @@ jobs:
         uses: actions/configure-pages@v5
         
       - name: Build with Jekyll
-        # This action builds the site and outputs it to ./_site
         uses: actions/jekyll-build-pages@v1
         with:
           source: ./
           destination: ./_site
           
+      # --- THIS IS THE FIX ---
+      - name: Fix _site permissions
+        run: chmod -R 777 ./_site 
+      # ------------------------
+          
       - name: Checkout 'assignment_q_nn' branch
         uses: actions/checkout@v4
         with:
           ref: 'assignment_q_nn'
-          # This is the key: we check it out *inside* the built site's folder
           path: ./_site/assignment_q_nn 
           
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload only the final built site
           path: ./_site 
 
   deploy:
-    # This job needs the 'build' job to finish first
     needs: build
     
     environment:

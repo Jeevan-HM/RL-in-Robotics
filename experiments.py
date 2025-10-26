@@ -259,7 +259,7 @@ def experiment_discount_factors():
     plot_comparison(
         histories,
         "Effect of Discount Factor on Performance",
-        "imagesexperiment_gamma.png",
+        "Report/images/experiment_gamma.png",
     )
 
 

@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DQN Gridworld Presentation</title>
+
+    <!-- Import Google Font: Inter (with more weights) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        /* Base styles */
+        :root {
+            --primary-blue: #0A74DA;
+            --primary-blue-dark: #00529B;
+            --accent-teal: #1DE9B6;
+            --accent-cyan: #B2FEFA;
+            --text-dark: #333333;
+            --text-light: #FFFFFF;
+            --bg-light: #FFFFFF;
+            --bg-page: #F0F2F5;
+        }
+
+        /* Fluid typography - scales smoothly across all screen sizes */
+        html {
+            font-size: clamp(14px, 1.2vw, 18px);
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-dark);
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Scalable Presentation Container */
+        #presentation-container {
+            position: relative;
+            width: 90vw;
+            height: calc(90vw * (9 / 16));
+            max-height: 90vh;
+            max-width: calc(90vh * (16 / 9));
+            margin: auto;
+            background-color: var(--bg-light);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            font-size: 1.0vw;
+        }
+
+        /* Slide container */
+        .slide {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            padding: clamp(2rem, 3.5vw, 3.5rem) clamp(1.5rem, 3.5vw, 3.5rem) clamp(3rem, 4vw, 4rem);
+            background-color: var(--bg-light);
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.6s ease-in-out, visibility 0s linear 0.6s;
+            z-index: 1;
+            align-items: center;
+            text-align: center;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.6s ease-in-out;
+            z-index: 2;
+        }
+
+        /* Responsive Typography */
+        h1,
+        h2,
+        h3 {
+            font-family: 'Inter', 'Segoe UI', 'Roboto', sans-serif;
+            font-weight: 700;
+            margin-top: 0;
+            letter-spacing: -0.02em;
+        }
+
+        h1 {
+            color: var(--primary-blue);
+            font-size: clamp(2rem, 3.5vw, 3.5rem);
+            line-height: 1.1;
+            margin-top: 1rem;
+            font-weight: 700;
+        }
+
+        h2 {
+            font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+            margin-top: 1rem;
+            font-weight: 700;
+        }
+
+        h3 {
+            font-size: clamp(1.25rem, 1.75vw, 1.75rem);
+            font-weight: 600;
+        }
+
+        p,
+        li {
+            font-size: clamp(1rem, 1.25vw, 1.25rem);
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        /* Adjust h1 on split slides */
+        .content-left h1,
+        .content-left-lg h1,
+        .content-left-sm h1,
+        .columns .col h1 {
+            font-size: clamp(1.75rem, 3vw, 3rem);
+            line-height: 1.1;
+        }
+
+        /* Content Animation */
+        .slide h1,
+        .slide p,
+        .slide h2,
+        .slide .bg-right,
+        .slide .columns,
+        .slide .grid-container,
+        .slide .interactive-demo,
+        .slide .card {
+            opacity: 0;
+            transform: translateY(1.5rem);
+            transition: opacity 0.5s ease-out 0.3s, transform 0.5s ease-out 0.3s;
+        }
+
+        .slide.active h1,
+        .slide.active p,
+        .slide.active h2,
+        .slide.active .bg-right,
+        .slide.active .columns,
+        .slide.active .grid-container,
+        .slide.active .interactive-demo,
+        .slide.active .card {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Slide 1: Title Slide */
+        .slide.lead {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background-image: linear-gradient(to right, var(--primary-blue), var(--primary-blue-dark));
+        }
+
+        .slide.lead h1 {
+            color: var(--text-light);
+            font-size: clamp(2.5rem, 5vw, 5rem);
+            font-weight: 900;
+            margin-bottom: 0.25em;
+            text-shadow: 0 0.1rem 0.5rem rgba(0, 0, 0, 0.2);
+            margin-top: 0;
+        }
+
+        .slide.lead h3 {
+            color: var(--accent-cyan);
+            font-weight: 300;
+            font-size: clamp(1.25rem, 2vw, 2rem);
+            margin-top: 0;
+        }
+
+        .slide.lead .author-info {
+            color: var(--text-light);
+            font-size: clamp(1rem, 1.5vw, 1.5rem);
+            font-weight: 400;
+            margin-top: 2rem;
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+
+        /* Slide 9: Final Slide */
+        .slide.invert {
+            background-image: linear-gradient(to right, var(--primary-blue), var(--primary-blue-dark));
+        }
+
+        .slide.invert h1,
+        .slide.invert p,
+        .slide.invert li,
+        .slide.invert ol {
+            color: var(--text-light);
+        }
+
+        .slide.invert ol {
+            font-size: clamp(1rem, 1.25vw, 1.25rem);
+            line-height: 1.6;
+        }
+
+        .slide.invert li {
+            padding-left: 0;
+            margin-bottom: 1.25rem;
+            font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+        }
+
+        .slide.invert li::before {
+            content: none;
+        }
+
+        /* Slide Footers */
+        .slide-header,
+        .slide-footer,
+        .pagination {
+            position: absolute;
+            font-size: clamp(0.75rem, 1vw, 1rem);
+            color: #888;
+            font-weight: 700;
+        }
+
+        .slide-header {
+            top: clamp(1.5rem, 2vw, 2rem);
+            left: clamp(2rem, 3.5vw, 3.5rem);
+        }
+
+        .slide-footer {
+            bottom: clamp(1.5rem, 2vw, 2rem);
+            left: clamp(2rem, 3.5vw, 3.5rem);
+        }
+
+        .pagination {
+            bottom: clamp(1.5rem, 2vw, 2rem);
+            right: clamp(2rem, 3.5vw, 3.5rem);
+        }
+
+        .slide.lead .slide-footer,
+        .slide.invert .slide-footer,
+        .slide.lead .pagination,
+        .slide.invert .pagination {
+            color: #f0f0f0;
+        }
+
+        .slide.invert .slide-footer {
+            font-size: clamp(1.75rem, 2.5vw, 2.5rem);
+            font-weight: 900;
+            color: var(--accent-cyan);
+            bottom: clamp(4rem, 6vw, 6rem);
+            left: 50%;
+            transform: translateX(-50%);
+            width: auto;
+            text-align: center;
+        }
+
+        /* General Layouts */
+        .columns {
+            display: flex;
+            gap: clamp(1.5rem, 2.5vw, 2.5rem);
+            width: 100%;
+            margin-top: 1.25rem;
+            flex-wrap: nowrap;
+            justify-content: center;
+        }
+
+        .col {
+            flex: 1;
+            min-width: clamp(15rem, 18vw, 18rem);
+            max-width: 100%;
+        }
+
+        .col-left {
+            flex-basis: 60%;
+            max-width: clamp(35rem, 44vw, 44rem);
+        }
+
+        .col-right {
+            flex-basis: 40%;
+            max-width: clamp(25rem, 30vw, 30rem);
+        }
+
+        /* Interactive Gridworld (Slide 2) */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 0.25rem;
+            width: 100%;
+            max-width: clamp(20rem, 30vw, 30rem);
+            aspect-ratio: 4 / 3;
+            margin-top: 1.25rem;
+            border: 3px solid var(--text-dark);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.1);
+        }
+
+        .grid-cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(0.85rem, 1.1vw, 1.1rem);
+            font-weight: 700;
+            color: var(--text-dark);
+            background-color: #FFFBEB;
+            position: relative;
+        }
+
+        .grid-cell[data-reward]:hover::after {
+            content: 'Reward: ' attr(data-reward);
+            position: absolute;
+            bottom: -2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--text-dark);
+            color: var(--text-light);
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.25rem;
+            font-size: clamp(0.7rem, 0.8vw, 0.8rem);
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .grid-cell.goal {
+            background-color: #2E7D32;
+            color: var(--text-light);
+        }
+
+        .grid-cell.trap {
+            background-color: #C62828;
+            color: var(--text-light);
+        }
+
+        .grid-cell.wall {
+            background-color: #616161;
+            color: var(--text-light);
+        }
+
+        /* Stochastic Demo (Slide 3) */
+        .interactive-demo {
+            margin-top: 1.5rem;
+            background-color: #F8F9FA;
+            border-radius: 0.5rem;
+            padding: clamp(0.75rem, 1vw, 1rem);
+            box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.05);
+        }
+
+        .interactive-demo h3 {
+            font-size: clamp(0.95rem, 1.1vw, 1.1rem);
+            margin-bottom: 0.5rem;
+            margin-top: 0;
+        }
+
+        .demo-buttons {
+            display: flex;
+            gap: clamp(0.5rem, 0.75vw, 0.75rem);
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .demo-buttons button {
+            flex: 1;
+            padding: clamp(0.5rem, 0.6vw, 0.6rem) clamp(0.6rem, 0.8vw, 0.8rem);
+            font-size: clamp(0.75rem, 0.85vw, 0.85rem);
+            font-weight: 700;
+            color: var(--text-light);
+            background-image: linear-gradient(to top, var(--primary-blue), #006FAA);
+            border: none;
+            border-radius: 0.3rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: clamp(5.5rem, 6.5vw, 6.5rem);
+        }
+
+        .demo-buttons button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+            background-image: linear-gradient(to top, #006FAA, #0080BD);
+        }
+
+        .demo-results-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.75rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        #stochastic-result {
+            height: auto;
+            min-height: 2em;
+            flex: 3;
+            font-size: clamp(0.9rem, 1.1vw, 1.1rem);
+            font-weight: 700;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            text-align: left;
+        }
+
+        #stochastic-result .fail {
+            color: #C62828;
+            margin-right: 0.35rem;
+        }
+
+        #stochastic-result .success {
+            color: #2E7D32;
+            margin-right: 0.35rem;
+        }
+
+        #demo-score {
+            font-size: clamp(0.9rem, 1.1vw, 1.1rem);
+            font-weight: 700;
+            color: var(--primary-blue-dark);
+            flex: 1;
+            text-align: right;
+            min-width: clamp(7.5rem, 8vw, 8rem);
+        }
+
+        .demo-grid-container {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(2.5rem, 1fr));
+            grid-template-rows: repeat(3, minmax(2.5rem, 1fr));
+            gap: 0.25rem;
+            justify-content: center;
+            margin-top: 0.75rem;
+            max-width: clamp(13rem, 16vw, 16rem);
+            aspect-ratio: 4 / 3;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .demo-grid-cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(0.6rem, 0.7vw, 0.7rem);
+            font-weight: 700;
+            color: var(--text-dark);
+            background-color: #E0E0E0;
+            border-radius: 0.3rem;
+            transition: all 0.2s ease;
+            position: relative;
+            min-height: 2.5rem;
+        }
+
+        .demo-grid-cell.goal {
+            background-color: #2E7D32;
+            color: var(--text-light);
+        }
+
+        .demo-grid-cell.trap {
+            background-color: #C62828;
+            color: var(--text-light);
+        }
+
+        .demo-grid-cell.wall {
+            background-color: #616161;
+            color: var(--text-light);
+        }
+
+        .demo-grid-cell.agent {
+            background-color: var(--primary-blue);
+            color: var(--text-light);
+            box-shadow: 0 0 0.6rem 0.1rem var(--primary-blue-dark);
+            transform: scale(1.05);
+            z-index: 2;
+            font-size: clamp(1.4rem, 1.8vw, 1.8rem);
+            line-height: 1;
+        }
+
+        .demo-grid-cell.success {
+            background-color: #66BB6A !important;
+            color: var(--text-light) !important;
+        }
+
+        .demo-grid-cell.fail {
+            background-color: #EF5350 !important;
+            color: var(--text-light) !important;
+        }
+
+        @keyframes pulse-goal {
+            0% {
+                box-shadow: 0 0 0.6rem 0.1rem var(--primary-blue-dark), 0 0 0 0 rgba(46, 125, 50, 0.7);
+            }
+
+            50% {
+                box-shadow: 0 0 0.6rem 0.1rem var(--primary-blue-dark), 0 0 1rem 0.6rem rgba(46, 125, 50, 0.3);
+            }
+
+            100% {
+                box-shadow: 0 0 0.6rem 0.1rem var(--primary-blue-dark), 0 0 0 0 rgba(46, 125, 50, 0);
+            }
+        }
+
+        .demo-grid-cell.agent.landed-goal {
+            animation: pulse-goal 0.8s ease-out;
+        }
+
+        @keyframes pulse-trap {
+            0% {
+                box-shadow: 0 0 0.6rem 0.1rem var(--primary-blue-dark), 0 0 0 0 rgba(198, 40, 40, 0.7);
+            }
+
+            50% {
+                box-shadow: 0 0 0.6rem 0.1rem var(--primary-blue-dark), 0 0 1rem 0.6rem rgba(198, 40, 40, 0.3);
+            }
+
+            100% {
+                box-shadow: 0 0 0.6rem 0.1rem var(--primary-blue-dark), 0 0 0 0 rgba(198, 40, 40, 0);
+            }
+        }
+
+        .demo-grid-cell.agent.landed-trap {
+            animation: pulse-trap 0.8s ease-out;
+        }
+
+        @keyframes shake-wall {
+
+            0%,
+            100% {
+                transform: translateX(0);
+                background-color: #616161;
+            }
+
+            25% {
+                transform: translateX(-4px);
+                background-color: #EF5350;
+            }
+
+            50% {
+                transform: translateX(4px);
+            }
+
+            75% {
+                transform: translateX(-4px);
+                background-color: #EF5350;
+            }
+        }
+
+        .demo-grid-cell.hit-wall {
+            animation: shake-wall 0.4s linear;
+        }
+
+        /* Info Cards (Slide 5) */
+        .card-container {
+            display: flex;
+            gap: clamp(1.5rem, 2.5vw, 2.5rem);
+            margin-top: 2.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .card {
+            flex: 1;
+            background-color: #F8F9FA;
+            border-radius: 0.5rem;
+            padding: clamp(1.25rem, 1.5vw, 1.5rem);
+            box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-top: 5px solid var(--accent-teal);
+            min-width: clamp(15rem, 17vw, 17rem);
+            max-width: clamp(22rem, 28vw, 28rem);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            font-size: clamp(1.5rem, 2vw, 2rem);
+            margin-top: 0;
+            color: var(--primary-blue);
+        }
+
+        .card ul {
+            margin-top: 1.25rem;
+        }
+
+        /* Custom Bullet Points */
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li {
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        li::before {
+            content: '✔';
+            color: var(--accent-teal);
+            font-size: clamp(0.9rem, 1.1vw, 1.1rem);
+            font-weight: 700;
+            margin-right: 0.6rem;
+            position: absolute;
+            left: -1.8rem;
+            top: 0.25rem;
+        }
+
+        ul,
+        ol,
+        .card,
+        .col,
+        .content-left,
+        .content-left-lg,
+        .content-left-sm {
+            text-align: left;
+        }
+
+        /* Cascading List Animation */
+        .slide.active li {
+            opacity: 0;
+            transform: translateY(1rem);
+            animation: fadeInItem 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeInItem {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide.active li:nth-child(1) {
+            animation-delay: 0.4s;
+        }
+
+        .slide.active li:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .slide.active li:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        .slide.active li:nth-child(4) {
+            animation-delay: 0.7s;
+        }
+
+        .slide.active li:nth-child(5) {
+            animation-delay: 0.8s;
+        }
+
+        /* Background image layouts */
+        .bg-right {
+            position: absolute;
+            left: auto;
+            right: clamp(2rem, 3.5vw, 3.5rem);
+            top: clamp(5rem, 7vw, 7rem);
+            border-radius: 0.5rem;
+            box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.1);
+            transition: opacity 0.3s ease-out, visibility 0.3s ease-out;
+            width: 38%;
+            max-width: 38%;
+        }
+
+        .content-left,
+        .content-left-lg,
+        .content-left-sm {
+            width: 100%;
+            margin-right: auto;
+            margin-left: 0;
+        }
+
+        .content-left {
+            max-width: 55%;
+        }
+
+        .content-left-lg {
+            max-width: 60%;
+        }
+
+        .content-left-sm {
+            max-width: 55%;
+        }
+
+        /* Key Findings Columns (Slide 8) */
+        .tab-content {
+            padding: 1.5rem 0;
+        }
+
+        .tab-content .col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: clamp(30rem, 38vw, 38rem);
+        }
+
+        .tab-content .col img {
+            width: 100%;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.1);
+            margin-top: 1.25rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .tab-content .col img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0.4rem 1.25rem rgba(0, 0, 0, 0.15);
+        }
+
+        .tab-content .col h3 {
+            color: var(--primary-blue);
+            border-bottom: 2px solid var(--accent-teal);
+            padding-bottom: 0.25rem;
+        }
+
+        /* Navigation Buttons */
+        .nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+        }
+
+        .nav button {
+            background-color: var(--primary-blue);
+            background-image: linear-gradient(to top, var(--primary-blue), #006FAA);
+            color: white;
+            border: none;
+            padding: clamp(0.6rem, 0.75vw, 0.75rem) clamp(1rem, 1.25vw, 1.25rem);
+            font-size: clamp(0.8rem, 0.9vw, 0.9rem);
+            font-weight: 700;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 0.25rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .nav button:hover {
+            background-image: linear-gradient(to top, #006FAA, #0080BD);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .nav button:disabled {
+            background-color: #999;
+            background-image: none;
+            cursor: not-allowed;
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* --- Responsive Breakpoints --- */
+
+        /* Large Desktop (1440px+) */
+        @media (min-width: 1440px) {
+            html {
+                font-size: 18px;
+            }
+
+            h1 {
+                font-weight: 700;
+            }
+
+            .slide.lead h1 {
+                font-weight: 900;
+            }
+        }
+
+        /* Desktop (1024px - 1439px) */
+        @media (min-width: 1024px) and (max-width: 1439px) {
+            html {
+                font-size: 16px;
+            }
+
+            h1 {
+                font-weight: 700;
+            }
+
+            h3 {
+                font-weight: 600;
+            }
+        }
+
+        /* Tablet Landscape (768px - 1023px) */
+        @media (min-width: 768px) and (max-width: 1023px) {
+            html {
+                font-size: 15px;
+            }
+
+            #presentation-container {
+                font-size: 1.3vw;
+            }
+
+            .bg-right {
+                display: none;
+            }
+
+            .content-left,
+            .content-left-lg,
+            .content-left-sm {
+                max-width: 90%;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .columns {
+                flex-direction: column;
+                flex-wrap: wrap;
+            }
+
+            .col-left,
+            .col-right {
+                flex-basis: 100%;
+            }
+
+            .col {
+                flex-basis: 100% !important;
+                padding-left: 0 !important;
+            }
+
+            h1 {
+                font-weight: 700;
+            }
+
+            h2 {
+                font-weight: 700;
+            }
+
+            h3 {
+                font-weight: 600;
+            }
+
+            p,
+            li {
+                font-weight: 400;
+            }
+        }
+
+        /* Tablet Portrait & Mobile Landscape (481px - 767px) */
+        @media (min-width: 481px) and (max-width: 767px) {
+            html {
+                font-size: 14px;
+            }
+
+            #presentation-container {
+                font-size: 4.5vw;
+                width: 100vw;
+                height: auto;
+                min-height: 100vh;
+                max-height: none;
+                max-width: 100vw;
+                box-shadow: none;
+            }
+
+            .slide {
+                padding: 2.5rem 1.5rem 5rem;
+                overflow-y: auto;
+                min-height: 100vh;
+                height: auto;
+            }
+
+            .slide-header,
+            .slide-footer,
+            .pagination {
+                display: none;
+            }
+
+            .slide.invert .slide-footer {
+                display: block;
+                font-size: 1.75rem;
+                bottom: 5.5rem;
+            }
+
+            li {
+                padding-left: 1rem;
+            }
+
+            li::before {
+                left: -1.5rem;
+            }
+
+            .demo-buttons {
+                gap: 0.5rem;
+            }
+
+            .interactive-demo {
+                padding: 0.75rem;
+                margin-top: 1rem;
+            }
+
+            .interactive-demo h3 {
+                font-size: 0.95rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .demo-buttons {
+                gap: 0.4rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .demo-buttons button {
+                font-size: 0.7rem;
+                padding: 0.45rem 0.6rem;
+                min-width: 4.5rem;
+            }
+
+            .demo-grid-container {
+                max-width: 70vw;
+                margin-top: 0.75rem;
+            }
+
+            #stochastic-result {
+                font-size: 0.8rem;
+                min-height: 2.5em;
+            }
+
+            #demo-score {
+                font-size: 0.8rem;
+            }
+
+            .columns {
+                gap: 2rem;
+                flex-direction: column;
+            }
+
+            .col {
+                flex-basis: 100% !important;
+                max-width: 100% !important;
+            }
+
+            .demo-grid-container {
+                max-width: 80vw;
+                margin-top: 1.5rem;
+            }
+
+            .nav {
+                padding: 0 1rem;
+                box-sizing: border-box;
+                width: 100%;
+                bottom: 1rem;
+                left: 0;
+                transform: none;
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .nav button {
+                width: 48%;
+                margin: 0;
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+                font-weight: 700;
+            }
+
+            h1 {
+                font-weight: 700;
+            }
+
+            h2 {
+                font-weight: 600;
+            }
+
+            h3 {
+                font-weight: 600;
+            }
+
+            p,
+            li {
+                font-weight: 400;
+            }
+
+            strong {
+                font-weight: 600;
+            }
+        }
+
+        /* Mobile Portrait (320px - 480px) */
+        @media (max-width: 480px) {
+            html {
+                font-size: 13px;
+            }
+
+            #presentation-container {
+                font-size: 5.5vw;
+                width: 100vw;
+                height: auto;
+                min-height: 100vh;
+                max-height: none;
+                max-width: 100vw;
+                box-shadow: none;
+            }
+
+            .slide {
+                padding: 2rem 1.25rem 5rem;
+                overflow-y: auto;
+                min-height: 100vh;
+                height: auto;
+            }
+
+            .slide.lead {
+                padding-top: 2rem;
+                padding-bottom: 2rem;
+            }
+
+            .slide.lead h1 {
+                font-size: 2.25rem;
+                font-weight: 800;
+            }
+
+            .slide.lead h3 {
+                font-size: 1.1rem;
+                font-weight: 300;
+            }
+
+            .slide.lead .author-info {
+                font-size: 0.95rem;
+            }
+
+            h1 {
+                font-size: 1.85rem;
+                font-weight: 700;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+                font-weight: 600;
+            }
+
+            h3 {
+                font-size: 1.2rem;
+                font-weight: 600;
+            }
+
+            p,
+            li {
+                font-size: 0.95rem;
+                font-weight: 400;
+                line-height: 1.5;
+            }
+
+            strong {
+                font-weight: 600;
+            }
+
+            .slide-header,
+            .slide-footer,
+            .pagination {
+                display: none;
+            }
+
+            .slide.invert .slide-footer {
+                display: block;
+                font-size: 1.5rem;
+                font-weight: 800;
+                bottom: 4.5rem;
+            }
+
+            .slide.invert li {
+                font-size: 0.9rem;
+                margin-bottom: 1rem;
+            }
+
+            li {
+                padding-left: 0.8rem;
+                margin-bottom: 0.85rem;
+            }
+
+            li::before {
+                left: -1.3rem;
+                font-size: 0.9rem;
+            }
+
+            .demo-buttons {
+                gap: 0.4rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .demo-buttons button {
+                font-size: 0.65rem;
+                padding: 0.4rem 0.55rem;
+                min-width: 4rem;
+            }
+
+            .interactive-demo {
+                padding: 0.7rem;
+                margin-top: 1rem;
+            }
+
+            .interactive-demo h3 {
+                font-size: 0.9rem;
+                margin-bottom: 0.5rem;
+            }
+
+            #stochastic-result {
+                font-size: 0.75rem;
+                font-weight: 600;
+                min-height: 2.5em;
+            }
+
+            #demo-score {
+                font-size: 0.75rem;
+                font-weight: 700;
+                min-width: 6.5rem;
+            }
+
+            .demo-grid-container {
+                max-width: 100%;
+                margin-top: 0.6rem;
+                grid-template-columns: repeat(4, minmax(3.2rem, 1fr));
+                grid-template-rows: repeat(3, minmax(3.2rem, 1fr));
+            }
+
+            .demo-grid-cell {
+                font-size: 0.55rem;
+                min-height: 3.2rem;
+            }
+
+            .demo-grid-cell.agent {
+                font-size: 1.3rem;
+            }
+
+            .columns {
+                gap: 1.5rem;
+            }
+
+            .card {
+                padding: 1rem;
+                min-width: 100%;
+            }
+
+            .card h2 {
+                font-size: 1.3rem;
+                font-weight: 600;
+            }
+
+            .card-container {
+                gap: 1.25rem;
+                margin-top: 1.5rem;
+            }
+
+            .grid-container {
+                max-width: 85vw;
+                margin-top: 1rem;
+            }
+
+            .grid-cell {
+                font-size: 0.75rem;
+            }
+
+            .nav {
+                padding: 0 0.75rem;
+                box-sizing: border-box;
+                width: 100%;
+                bottom: 0.75rem;
+                left: 0;
+                transform: none;
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .nav button {
+                width: 48%;
+                margin: 0;
+                padding: 0.55rem 0.85rem;
+                font-size: 0.75rem;
+                font-weight: 700;
+            }
+        }
+
+        /* Extra Small Mobile (< 375px) */
+        @media (max-width: 374px) {
+            html {
+                font-size: 12px;
+            }
+
+            #presentation-container {
+                font-size: 6vw;
+            }
+
+            .slide {
+                padding: 1.75rem 1rem;
+            }
+
+            h1 {
+                font-size: 1.65rem;
+                font-weight: 700;
+            }
+
+            h2 {
+                font-size: 1.25rem;
+                font-weight: 600;
+            }
+
+            h3 {
+                font-size: 1.1rem;
+                font-weight: 600;
+            }
+
+            p,
+            li {
+                font-size: 0.9rem;
+                font-weight: 400;
+            }
+
+            .slide.lead h1 {
+                font-size: 2rem;
+                font-weight: 800;
+            }
+
+            .slide.lead h3 {
+                font-size: 1rem;
+            }
+
+            .nav button {
+                font-size: 0.7rem;
+                padding: 0.5rem 0.75rem;
+            }
+
+            .demo-buttons button {
+                font-size: 0.7rem;
+                padding: 0.45rem 0.6rem;
+            }
+
+            li::before {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Landscape orientation adjustments for mobile */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .slide {
+                padding: 1.5rem 2rem;
+                overflow-y: auto;
+            }
+
+            .slide.lead h1 {
+                font-size: 2.5rem;
+            }
+
+            .slide.lead h3 {
+                font-size: 1.25rem;
+            }
+
+            .slide.lead .author-info {
+                margin-top: 1rem;
+                font-size: 1rem;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            h2 {
+                font-size: 1.35rem;
+            }
+
+            .card-container {
+                flex-direction: row;
+                margin-top: 1.5rem;
+            }
+
+            .nav {
+                bottom: 0.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main id="presentation-container">
+        <!-- SLIDE 1 -->
+        <section class="slide active lead">
+            <div class="slide-footer">Jeevan Hebbal Manjunath | ASU ID: 1233364576</div>
+            <h1>Deep Q-Network Solution for Stochastic Gridworld Navigation</h1>
+            <h3>A Reinforcement Learning Project</h3>
+            <p class="author-info">Jeevan Hebbal Manjunath<br>jhebbalm@asu.edu</p>
+            <div class="pagination">1 / 9</div>
+        </section>
+
+        <!-- SLIDE 2 -->
+        <section class="slide">
+            <div class="slide-header">The Problem</div>
+            <div class="slide-footer">Slide 2 / 9</div>
+            <div class="pagination">2 / 9</div>
+
+            <div class="columns">
+                <div class="col col-left">
+                    <h1>The Problem: A Stochastic Gridworld</h1>
+                    <p>The goal is to train an agent to find the best path in a 3x4 grid.</p>
+                    <ul>
+                        <li><strong>Goal:</strong> (0,3) | Reward: <strong>+1.0</strong></li>
+                        <li><strong>Trap:</strong> (1,3) | Reward: <strong>-1.0</strong></li>
+                        <li><strong>Obstacle:</strong> (1,1) | Impassable Wall</li>
+                        <li><strong>Step Cost:</strong> Every move costs <strong>-0.04</strong> to encourage efficiency.
+                        </li>
+                    </ul>
+                </div>
+                <div class="col col-right">
+                    <div class="grid-container">
+                        <div class="grid-cell" data-reward="-0.04">(0,0)</div>
+                        <div class="grid-cell" data-reward="-0.04">(0,1)</div>
+                        <div class="grid-cell" data-reward="-0.04">(0,2)</div>
+                        <div class="grid-cell goal" data-reward="+1.0">Goal</div>
+                        <div class="grid-cell" data-reward="-0.04">(1,0)</div>
+                        <div class="grid-cell wall">Wall</div>
+                        <div class="grid-cell" data-reward="-0.04">(1,2)</div>
+                        <div class="grid-cell trap" data-reward="-1.0">Trap</div>
+                        <div class="grid-cell" data-reward="-0.04">Start</div>
+                        <div class="grid-cell" data-reward="-0.04">(2,1)</div>
+                        <div class="grid-cell" data-reward="-0.04">(2,2)</div>
+                        <div class="grid-cell" data-reward="-0.04">(2,3)</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 3 -->
+        <section class="slide">
+            <div class="slide-header">The Challenge</div>
+            <div class="slide-footer">Slide 3 / 9</div>
+            <div class="pagination">3 / 9</div>
+
+            <div class="columns">
+                <div class="col" style="flex-basis: calc(50% - 1.25rem);">
+                    <h1>The Challenge: An Unreliable World</h1>
+                    <ul>
+                        <li>This isn't a simple pathfinding problem. The world is <strong>stochastic</strong>.</li>
+                        <li>An agent's actions can fail. When it tries to move "North":</li>
+                        <li style="padding-left: 2rem;"><strong>80% Chance:</strong> It succeeds and moves North.</li>
+                        <li style="padding-left: 2rem;"><strong>20% Chance:</strong> It "slips" sideways (10% left, 10%
+                            right).</li>
+                    </ul>
+
+                    <div class="interactive-demo">
+                        <h3>Try it:</h3>
+                        <div class="demo-buttons">
+                            <button onclick="simulateAction('North')">Go North</button>
+                            <button onclick="simulateAction('South')">Go South</button>
+                            <button onclick="simulateAction('West')">Go West</button>
+                            <button onclick="simulateAction('East')">Go East</button>
+                            <button onclick="resetAgent()"
+                                style="flex: 0.5; background-image: linear-gradient(to top, #616161, #757575);">Reset</button>
+                        </div>
+
+                        <div class="demo-grid-container">
+                            <div class="demo-grid-cell" id="demo-cell-0-0">(0,0)</div>
+                            <div class="demo-grid-cell" id="demo-cell-0-1">(0,1)</div>
+                            <div class="demo-grid-cell" id="demo-cell-0-2">(0,2)</div>
+                            <div class="demo-grid-cell goal" id="demo-cell-0-3">Goal</div>
+                            <div class="demo-grid-cell" id="demo-cell-1-0">(1,0)</div>
+                            <div class="demo-grid-cell wall" id="demo-cell-1-1">Wall</div>
+                            <div class="demo-grid-cell" id="demo-cell-1-2">(1,2)</div>
+                            <div class="demo-grid-cell trap" id="demo-cell-1-3">Trap</div>
+                            <div class="demo-grid-cell" id="demo-cell-2-0">Start</div>
+                            <div class="demo-grid-cell" id="demo-cell-2-1">(2,1)</div>
+                            <div class="demo-grid-cell" id="demo-cell-2-2">(2,2)</div>
+                            <div class="demo-grid-cell" id="demo-cell-2-3">(2,3)</div>
+                        </div>
+
+                        <div class="demo-results-container">
+                            <div id="stochastic-result">Click a button to see the outcome...</div>
+                            <div id="demo-score">Total Reward: 0.00</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col" style="flex-basis: calc(50% - 1.25rem); max-width: 45rem; padding-left: 0;">
+                    <h3 style="color: var(--primary-blue); font-size: 1.5em; margin-top: 0;">Solution: Exploration</h3>
+                    <p style="font-size: 1.2em; line-height: 1.5;">To solve this, the agent must
+                        <strong>explore</strong>. It starts 100% random (Epsilon=1.0) and slowly "decays" to become 99%
+                        greedy.
+                    </p>
+                    <img src="Report/images/experiment_epsilon.png" alt="Epsilon Decay Plot"
+                        style="width: 100%; border-radius: 0.5rem; box-shadow: 0 0.25rem 1rem rgba(0,0,0,0.1); margin-top: 0.6rem;">
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 4 -->
+        <section class="slide">
+            <div class="slide-header">The Solution</div>
+            <div class="slide-footer">Slide 4 / 9</div>
+            <div class="pagination">4 / 9</div>
+
+            <div style="max-width: 56rem; margin: 0 auto;">
+                <h1>Our Solution: Deep Q-Network (DQN)</h1>
+                <ul style="display: inline-block; text-align: left; margin-top: 2rem;">
+                    <li>A standard table is too simple for complex problems.</li>
+                    <li>We use a neural network (a "brain") to <strong>approximate</strong> the best action.</li>
+                    <li>This "brain" is called a Deep Q-Network, or DQN.</li>
+                    <li>It learns by predicting the future reward for every possible action.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SLIDE 5 -->
+        <section class="slide">
+            <div class="slide-header">DQN Architecture</div>
+            <div class="slide-footer">Slide 5 / 9</div>
+            <div class="pagination">5 / 9</div>
+
+            <h1 style="text-align: center;">DQN Architecture</h1>
+            <ul style="max-width: 56rem; margin-left: auto; margin-right: auto; margin-top: 1rem;">
+                <li>This is the "brain" of our agent.</li>
+                <li><strong>Input:</strong> The agent's current state (a 12-position "one-hot" vector).</li>
+                <li><strong>Hidden Layers:</strong> Two "thinking" layers of 64 neurons each process the state.</li>
+                <li><strong>Output:</strong> Four Q-Values, one for each action (N, S, E, W).</li>
+                <li>The highest Q-Value is the agent's <strong>predicted best move</strong>.</li>
+            </ul>
+
+            <img src="Report/images/experiment_architecture.png" alt="Network Architecture Plot"
+                style="display: block; margin: 2rem auto 0 auto; width: 100%; max-width: 44rem; border-radius: 0.5rem; box-shadow: 0 0.25rem 1rem rgba(0,0,0,0.1);">
+        </section>
+
+        <!-- SLIDE 6 -->
+        <section class="slide">
+            <div class="slide-header">How It Learns</div>
+            <div class="slide-footer">Slide 6 / 9</div>
+            <div class="pagination">6 / 9</div>
+
+            <h1>How it Learns: The Training Loop</h1>
+            <p>The agent learns using two key DQN techniques:</p>
+
+            <div class="card-container">
+                <div class="card">
+                    <h2>1. Experience Replay (The "Memory")</h2>
+                    <ul>
+                        <li>The agent stores experiences (state, action, reward, next_state) in a 10,000-item buffer.
+                        </li>
+                        <li>It trains by sampling a random <strong>batch of 32</strong> old experiences. This breaks
+                            correlations and stabilizes learning.</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h2>2. Target Network (The "Anchor")</h2>
+                    <ul>
+                        <li>A second, identical network is used to provide a stable learning target.</li>
+                        <li>It's updated only every 100 steps, preventing the agent from "chasing a moving target" and
+                            allowing it to converge.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 7 -->
+        <section class="slide">
+            <div class="slide-header">Training Results</div>
+            <div class="slide-footer">Slide 7 / 9</div>
+            <div class="pagination">7 / 9</div>
+
+            <img src="Report/images/gridworld_dqn_results.png" alt="Main Training Results Plot" class="bg-right">
+
+            <div class="content-left-sm">
+                <h1>Training Results: A Clear Success</h1>
+                <p>The agent was trained for <strong>2,000 episodes</strong>.</p>
+                <ul>
+                    <li><strong>Learning Curve:</strong> Performance rapidly improves around episode 300.</li>
+                    <li><strong>Convergence:</strong> The policy becomes stable and near-optimal after ~1,000 episodes.
+                    </li>
+                    <li><strong>Final Performance:</strong> The agent achieves a final mean reward of 0.82 ± 0.05.
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SLIDE 8 -->
+        <section class="slide">
+            <div class="slide-header">Key Findings</div>
+            <div class="slide-footer">Slide 8 / 9</div>
+            <div class="pagination">8 / 9</div>
+
+            <h1>Key Insight: Finding the "Sweet Spot"</h1>
+            <p>Performance is <strong>highly sensitive</strong> to hyperparameters. We ran experiments to find the
+                optimal settings.</p>
+
+            <div class="columns" style="margin-top: 2rem;">
+                <div class="col">
+                    <h3
+                        style="color: var(--primary-blue); border-bottom: 2px solid var(--accent-teal); padding-bottom: 0.25rem;">
+                        Learning Rate</h3>
+                    <ul>
+                        <li><strong>Too High (0.01):</strong> Unstable.</li>
+                        <li><strong>Too Low (0.0001):</strong> Too slow.</li>
+                        <li><strong>Just Right (0.001):</strong> Fast & stable.</li>
+                    </ul>
+                    <img src="Report/images/experiment_learning_rate.png" alt="Learning Rate Experiment"
+                        style="width: 100%; border-radius: 0.5rem; box-shadow: 0 0.25rem 1rem rgba(0,0,0,0.1); margin-top: 0.75rem;">
+                </div>
+                <div class="col">
+                    <h3
+                        style="color: var(--primary-blue); border-bottom: 2px solid var(--accent-teal); padding-bottom: 0.25rem;">
+                        Network Size</h3>
+                    <ul>
+                        <li><strong>Too Small ([32]):</strong> Failed.</li>
+                        <li><strong>Too Big ([64,64,64]):</strong> Unstable.</li>
+                        <li><strong>Just Right ([64, 64]):</strong> Optimal.</li>
+                    </ul>
+                    <img src="Report/images/experiment_architecture.png" alt="Network Architecture Experiment"
+                        style="width: 100%; border-radius: 0.5rem; box-shadow: 0 0.25rem 1rem rgba(0,0,0,0.1); margin-top: 0.75rem;">
+                </div>
+            </div>
+        </section>
+
+        <!-- SLIDE 9 -->
+        <section class="slide invert">
+            <div class="slide-header" style="color: #f0f0f0;">Conclusion</div>
+            <div class="slide-footer">Thank You</div>
+            <div class="pagination">9 / 9</div>
+
+            <h1>Conclusion & The Learned Policy</h1>
+
+            <ol>
+                <li><strong>Success:</strong> The DQN <strong>successfully</strong> solved the complex stochastic
+                    environment.</li>
+
+                <li><strong>The Optimal Path:</strong> The agent learned the 5-step optimal path:<br>
+                    <strong>North</strong> &rarr; <strong>North</strong> &rarr; <strong>East</strong> &rarr;
+                    <strong>East</strong> &rarr; <strong>East</strong>
+                </li>
+
+                <li><strong>Learned Caution:</strong> The agent is robust. From (0,2), it strongly prefers East
+                    (Goal) and avoids any move that risks "slipping" into the trap.</li>
+
+                <li><strong>Tuning is Key:</strong> Finding the right hyperparameters was the most critical factor for
+                    success.</li>
+            </ol>
+        </section>
+    </main>
+
+    <div class="nav">
+        <button id="prevBtn" disabled>Prev</button>
+        <button id="nextBtn">Next</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        let agentPos = { r: 2, c: 0 };
+        let demoScore = 0.0;
+        const WALL_POS = { r: 1, c: 1 };
+        const GRID_ROWS = 3;
+        const GRID_COLS = 4;
+
+        function showSlide(index) {
+            slides.forEach((slide, i) => {
+                slide.classList.remove('active');
+                if (i === index) {
+                    slide.classList.add('active');
+                }
+            });
+
+            prevBtn.disabled = (index === 0);
+            nextBtn.disabled = (index === totalSlides - 1);
+
+            if (index === 2) {
+                resetAgent();
+            } else {
+                clearHighlights();
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        }
+
+        nextBtn.addEventListener('click', nextSlide);
+        prevBtn.addEventListener('click', prevSlide);
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowRight') {
+                nextSlide();
+            } else if (event.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        function updateScoreUI() {
+            const scoreEl = document.getElementById('demo-score');
+            if (scoreEl) {
+                scoreEl.textContent = `Total Reward: ${demoScore.toFixed(2)}`;
+                if (demoScore > 0) {
+                    scoreEl.style.color = '#2E7D32';
+                } else if (demoScore < 0) {
+                    scoreEl.style.color = '#C62828';
+                } else {
+                    scoreEl.style.color = 'var(--primary-blue-dark)';
+                }
+            }
+        }
+
+        function updateAgentOnGrid() {
+            document.querySelectorAll('.demo-grid-cell').forEach((cell, index) => {
+                cell.classList.remove('agent');
+
+                if (!cell.classList.contains('goal') && !cell.classList.contains('trap') && !cell.classList.contains('wall')) {
+                    const r = Math.floor(index / GRID_COLS);
+                    const c = index % GRID_COLS;
+
+                    if (cell.id === 'demo-cell-2-0') {
+                        cell.textContent = 'Start';
+                    } else if (cell.id.startsWith('demo-cell-')) {
+                        cell.textContent = `(${r},${c})`;
+                    }
+                }
+            });
+
+            const agentCellId = `demo-cell-${agentPos.r}-${agentPos.c}`;
+            const agentCell = document.getElementById(agentCellId);
+            if (agentCell) {
+                agentCell.classList.add('agent');
+                agentCell.textContent = '🤖';
+            }
+        }
+
+        function clearHighlights() {
+            document.querySelectorAll('.demo-grid-cell').forEach(cell => {
+                cell.classList.remove('success', 'fail', 'landed-goal', 'landed-trap', 'hit-wall');
+            });
+        }
+
+        function resetAgent() {
+            agentPos = { r: 2, c: 0 };
+            demoScore = 0.0;
+            clearHighlights();
+            updateAgentOnGrid();
+            updateScoreUI();
+            const resultEl = document.getElementById('stochastic-result');
+            if (resultEl) {
+                resultEl.innerHTML = 'Agent reset to Start (2,0). Click a button.';
+            }
+        }
+
+        function simulateAction(intendedActionName) {
+            clearHighlights();
+
+            const rand = Math.random();
+            let actualActionName = '';
+            let actionMessage = '';
+            let slipActionName = '';
+
+            const actionMap = {
+                'North': { r: -1, c: 0 },
+                'South': { r: 1, c: 0 },
+                'East': { c: 1, r: 0 },
+                'West': { c: -1, r: 0 }
+            };
+
+            const lateralActions = {
+                'North': ['West', 'East'],
+                'South': ['West', 'East'],
+                'East': ['North', 'South'],
+                'West': ['North', 'South']
+            };
+
+            if (rand < 0.8) {
+                actualActionName = intendedActionName;
+                actionMessage = `<span class="success">Success!</span> (Moved ${actualActionName})`;
+            } else if (rand < 0.9) {
+                actualActionName = lateralActions[intendedActionName][0];
+                slipActionName = actualActionName;
+                actionMessage = `<span class="fail">Slip!</span> (Tried ${intendedActionName}, went ${actualActionName})`;
+            } else {
+                actualActionName = lateralActions[intendedActionName][1];
+                slipActionName = actualActionName;
+                actionMessage = `<span class="fail">Slip!</span> (Tried ${intendedActionName}, went ${actualActionName})`;
+            }
+
+            const move = actionMap[actualActionName];
+            let targetPos = {
+                r: agentPos.r + move.r,
+                c: agentPos.c + move.c
+            };
+
+            let validMove = true;
+            if (targetPos.r < 0 || targetPos.r >= GRID_ROWS ||
+                targetPos.c < 0 || targetPos.c >= GRID_COLS) {
+                validMove = false;
+            } else if (targetPos.r === WALL_POS.r && targetPos.c === WALL_POS.c) {
+                validMove = false;
+            }
+
+            const resultEl = document.getElementById('stochastic-result');
+            let rewardMessage = '';
+
+            if (validMove) {
+                agentPos = targetPos;
+
+                if (agentPos.r === 0 && agentPos.c === 3) {
+                    demoScore += 1.0;
+                    rewardMessage = `... to the <strong>Goal</strong>! (<span class="success">+1.00</span>)`;
+                } else if (agentPos.r === 1 && agentPos.c === 3) {
+                    demoScore -= 1.0;
+                    rewardMessage = `... into the <strong>Trap</strong>! (<span class="fail">-1.00</span>)`;
+                } else {
+                    demoScore -= 0.04;
+                    rewardMessage = `... (<span class="fail">-0.04</span>)`;
+                }
+            } else {
+                rewardMessage = `... <span class="fail">But hit a wall!</span> (No reward change)`;
+            }
+
+            resultEl.innerHTML = actionMessage + rewardMessage;
+
+            updateAgentOnGrid();
+            updateScoreUI();
+
+            const agentCell = document.getElementById(`demo-cell-${agentPos.r}-${agentPos.c}`);
+
+            if (validMove) {
+                if (agentCell) {
+                    if (agentPos.r === 0 && agentPos.c === 3) {
+                        agentCell.classList.add('landed-goal');
+                    } else if (agentPos.r === 1 && agentPos.c === 3) {
+                        agentCell.classList.add('landed-trap');
+                    } else if (slipActionName) {
+                        agentCell.classList.add('fail');
+                    } else {
+                        agentCell.classList.add('success');
+                    }
+                }
+            } else {
+                if (agentCell) {
+                    agentCell.classList.add('fail');
+                }
+
+                const wallCellId = `demo-cell-${targetPos.r}-${targetPos.c}`;
+                const wallCell = document.getElementById(wallCellId);
+                if (wallCell) {
+                    wallCell.classList.add('hit-wall');
+                }
+            }
+        }
+
+        showSlide(currentSlide);
+    </script>
+</body>
+
+</html>

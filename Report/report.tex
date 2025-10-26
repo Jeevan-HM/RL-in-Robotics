@@ -147,6 +147,21 @@ How much network capacity does a 12-state problem need? Figure \ref{fig:arch} pr
 
 Two layers with 64 neurons each (orange) work excellently, achieving our best 0.82 reward. Interestingly, adding more capacity—either more neurons per layer [128,128] (green) or more layers [64,64,64] (red)—doesn't improve results. The three-layer network actually shows instability, with evaluation performance occasionally dropping dramatically. This suggests that for small state spaces, compact networks may train more reliably than overparameterized ones.
 
+To further explore this, we trained two additional specific architectures. A 'fast' lightweight [32, 32] network (Figure \ref{fig:fast_arch}) converged rapidly but stabilized at a lower mean reward (approx. 0.75), reinforcing that this network may lack sufficient capacity. Conversely, a 'deep' [128, 128, 64] network (Figure \ref{fig:deep_arch}), even with tuned hyperparameters, also converged to a similar 0.75-0.78 reward, confirming that excess capacity is unnecessary for this task.
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{images/gridworld_dqn_results_fast.png}}
+\caption{Training progression for a 'fast' lightweight [32, 32] network. Note the hyperparameters are tuned for speed (e.g., \texttt{epsilon\_decay=0.99}, \texttt{target\_update\_freq=50}). It converges quickly but to a slightly suboptimal policy around 0.75 reward.}
+\label{fig:fast_arch}
+\end{figure}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=\columnwidth]{images/gridworld_dqn_results_deep.png}}
+\caption{Training progression for a 'deep' [128, 128, 64] network. This run used a smaller learning rate (0.0005) and larger batch size (64). It also converges to a stable policy (approx. 0.75-0.78), showing no performance gain from the added complexity.}
+\label{fig:deep_arch}
+\end{figure}
+
+
 \subsubsection{Balancing Exploration and Exploitation}
 
 The epsilon decay rate determines how quickly we shift from exploration to exploitation. Figure \ref{fig:epsilon} demonstrates this tradeoff's importance. Fast decay (0.99, blue) commits to a greedy policy by episode 400 but achieves only 0.72 reward—the agent hasn't explored enough to find optimal paths.

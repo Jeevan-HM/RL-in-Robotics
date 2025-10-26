@@ -22,7 +22,7 @@ jobs:
           ref: 'assignment_q_nn' 
           
           # This is the sub-folder it will live in on the website
-          path: 'assignment'         
+          path: 'assignment_q_nn'         
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

@@ -1,0 +1,67 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyperFirstAtBeginDocument{\AtBeginDocument}
+\HyperFirstAtBeginDocument{\ifx\hyper@anchor\@undefined
+\global\let\oldcontentsline\contentsline
+\gdef\contentsline#1#2#3#4{\oldcontentsline{#1}{#2}{#3}}
+\global\let\oldnewlabel\newlabel
+\gdef\newlabel#1#2{\newlabelxx{#1}#2}
+\gdef\newlabelxx#1#2#3#4#5#6{\oldnewlabel{#1}{{#2}{#3}}}
+\AtEndDocument{\ifx\hyper@anchor\@undefined
+\let\contentsline\oldcontentsline
+\let\newlabel\oldnewlabel
+\fi}
+\fi}
+\global\let\hyper@last\relax 
+\gdef\HyperFirstAtBeginDocument#1{#1}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{sutton2018reinforcement}
+\citation{mnih2015human}
+\@writefile{toc}{\contentsline {section}{\numberline {I}Introduction}{1}{section.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {I-A}}Problem Description}{1}{subsection.1.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces The gridworld environment. Green indicates the goal (+1), red shows the trap (-1), gray marks the obstacle, and yellow cells have -0.04 step costs. The agent starts at the bottom-left.}}{1}{figure.1}\protected@file@percent }
+\newlabel{fig:gridworld}{{1}{1}{The gridworld environment. Green indicates the goal (+1), red shows the trap (-1), gray marks the obstacle, and yellow cells have -0.04 step costs. The agent starts at the bottom-left}{figure.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {II}Approach}{1}{section.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-A}}Overall Strategy}{1}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-B}}Network Design}{1}{subsection.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-C}}Training Process}{2}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-D}}Hyperparameter Choices}{2}{subsection.2.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {I}{\ignorespaces Hyperparameter Configuration}}{2}{table.1}\protected@file@percent }
+\newlabel{tab:hyperparameters}{{I}{2}{Hyperparameter Configuration}{table.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {II-E}}Evaluation Methodology}{2}{subsection.2.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {III}Results and Discussion}{2}{section.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-A}}Learning Dynamics}{2}{subsection.3.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Training progression over 2,000 episodes. The top-left panel shows raw episode rewards (blue, highly variable due to stochasticity) and a smoothed moving average (orange) revealing clear learning. Top-right displays evaluation performance with error bars, showing consistent improvement and eventual convergence. Bottom-left illustrates epsilon's exponential decay from full exploration to near-greedy policy. The bottom-right panel lists our hyperparameter configuration for reproducibility.}}{2}{figure.2}\protected@file@percent }
+\newlabel{fig:training}{{2}{2}{Training progression over 2,000 episodes. The top-left panel shows raw episode rewards (blue, highly variable due to stochasticity) and a smoothed moving average (orange) revealing clear learning. Top-right displays evaluation performance with error bars, showing consistent improvement and eventual convergence. Bottom-left illustrates epsilon's exponential decay from full exploration to near-greedy policy. The bottom-right panel lists our hyperparameter configuration for reproducibility}{figure.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-B}}Hyperparameter Sensitivity}{2}{subsection.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-B}1}Learning Rate Impact}{2}{subsubsection.3.2.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Learning rate comparison across three values. The middle ground ($\alpha =0.001$, orange) converges fastest to the highest reward while maintaining stability. Too low is safe but slow; too high is fast but unstable.}}{3}{figure.3}\protected@file@percent }
+\newlabel{fig:lr}{{3}{3}{Learning rate comparison across three values. The middle ground ($\alpha =0.001$, orange) converges fastest to the highest reward while maintaining stability. Too low is safe but slow; too high is fast but unstable}{figure.3}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-B}2}Network Architecture Exploration}{3}{subsubsection.3.2.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Network architecture comparison from simple to complex. Two layers with 64 neurons each (orange) achieves best performance. More capacity doesn't help—the three-layer network (red) even shows instability with sudden drops.}}{3}{figure.4}\protected@file@percent }
+\newlabel{fig:arch}{{4}{3}{Network architecture comparison from simple to complex. Two layers with 64 neurons each (orange) achieves best performance. More capacity doesn't help—the three-layer network (red) even shows instability with sudden drops}{figure.4}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-B}3}Balancing Exploration and Exploitation}{3}{subsubsection.3.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-B}4}Batch Size Considerations}{3}{subsubsection.3.2.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Epsilon decay rate comparison. Too fast (0.99, blue) leads to premature exploitation and suboptimal policies. Too slow (0.999, green) wastes episodes on excessive exploration. Our chosen rate (0.995, orange) balances these concerns effectively.}}{3}{figure.5}\protected@file@percent }
+\newlabel{fig:epsilon}{{5}{3}{Epsilon decay rate comparison. Too fast (0.99, blue) leads to premature exploitation and suboptimal policies. Too slow (0.999, green) wastes episodes on excessive exploration. Our chosen rate (0.995, orange) balances these concerns effectively}{figure.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Batch size effects on learning. Small batches (16, blue) are fast but noisy. Large batches (128, red) are smooth but slow. Batch size 32 (orange) offers the best practical compromise.}}{3}{figure.6}\protected@file@percent }
+\newlabel{fig:batchsize_plot}{{6}{3}{Batch size effects on learning. Small batches (16, blue) are fast but noisy. Large batches (128, red) are smooth but slow. Batch size 32 (orange) offers the best practical compromise}{figure.6}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {\mbox  {III-B}5}Planning Horizon Through Discounting}{3}{subsubsection.3.2.5}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Discount factor comparison showing planning horizon effects. Low gamma (0.9, blue) produces shortsighted policies. High gamma (0.99, green) appropriately values the long-term goal for this episodic task.}}{3}{figure.7}\protected@file@percent }
+\newlabel{fig:gamma}{{7}{3}{Discount factor comparison showing planning horizon effects. Low gamma (0.9, blue) produces shortsighted policies. High gamma (0.99, green) appropriately values the long-term goal for this episodic task}{figure.7}{}}
+\citation{van2016deep}
+\citation{schaul2015prioritized}
+\citation{wang2016dueling}
+\bibcite{sutton2018reinforcement}{1}
+\bibcite{mnih2015human}{2}
+\bibcite{glorot2010understanding}{3}
+\bibcite{van2016deep}{4}
+\bibcite{schaul2015prioritized}{5}
+\bibcite{wang2016dueling}{6}
+\bibcite{pytorch}{7}
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-C}}Learned Policy Analysis}{4}{subsection.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {\mbox  {III-D}}Practical Insights}{4}{subsection.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {IV}Conclusion}{4}{section.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{References}{4}{section*.2}\protected@file@percent }
+\gdef \@abspage@last{4}

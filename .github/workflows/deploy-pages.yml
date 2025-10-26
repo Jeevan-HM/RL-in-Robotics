@@ -1,0 +1,52 @@
+# This is the full content for: .github/workflows/deploy-pages.yml
+
+name: Assignment Q Learning By Neural Network
+
+on:
+  # Runs on pushes to the main branch
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main branch content
+        uses: actions/checkout@v4
+
+      - name: Checkout 'assignment_q_nn' branch into 'assignment' folder
+        uses: actions/checkout@v4
+        with:
+          # This is your other branch
+          ref: 'assignment_q_nn' 
+          
+          # This is the sub-folder it will live in on the website
+          path: 'assignment'         
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload the entire root directory, which now contains
+          # both main content and the new 'assignment' folder
+          path: '.' 
+
+  deploy:
+    needs: build
+    
+    permissions:
+      pages: write
+      id-token: write
+      
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+      
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

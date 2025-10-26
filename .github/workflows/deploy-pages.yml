@@ -1,59 +1,56 @@
 # This is the full content for: .github/workflows/deploy-pages.yml
 
-name: Deploy Combined Pages with README
+name: Deploy Pages with Jekyll
 
 on:
   # Runs on pushes to the main branch
   push:
     branches:
       - main
+      
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions for GITHUB_TOKEN
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main branch content
+      - name: Checkout main branch
         uses: actions/checkout@v4
-
-      # --- NEW, RELIABLE CONVERSION STEPS ---
-      - name: Set up Python
-        uses: actions/setup-python@v5
+        
+      - name: Setup Pages (with Jekyll)
+        uses: actions/configure-pages@v5
+        
+      - name: Build with Jekyll
+        # This action builds the site and outputs it to ./_site
+        uses: actions/jekyll-build-pages@v1
         with:
-          python-version: '3.x'
-
-      - name: Install Markdown converter
-        run: pip install markdown
-
-      - name: Convert README.md to index.html
-        # Uses 'extra' extensions to be more like GitHub's markdown
-        run: python -m markdown -x "extra" README.md > index.html
-      # ----------------------------------------
-
+          source: ./
+          destination: ./_site
+          
       - name: Checkout 'assignment_q_nn' branch
         uses: actions/checkout@v4
         with:
-          # This is your other branch
-          ref: 'assignment_q_nn' 
+          ref: 'assignment_q_nn'
+          # This is the key: we check it out *inside* the built site's folder
+          path: ./_site/assignment_q_nn 
           
-          # This is the sub-folder
-          path: 'assignment_q_nn'         
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload the entire directory, including the new index.html
-          path: '.' 
+          # Upload only the final built site
+          path: ./_site 
 
   deploy:
+    # This job needs the 'build' job to finish first
     needs: build
     
-    permissions:
-      pages: write
-      id-token: write
-      
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

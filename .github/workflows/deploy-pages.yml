@@ -14,24 +14,19 @@ jobs:
     steps:
       - name: Checkout main branch content
         uses: actions/checkout@v4
-        with:
-          # Fetches all history, needed for the markdown-to-html action
-          fetch-depth: 0 
 
+      # --- THIS IS THE CORRECTED STEP ---
       - name: Convert README.md to index.html
-        uses: avto-dev/github-markdown-action@v2
+        uses: peaceiris/actions-md2html@v1
         with:
           input_file: 'README.md'
           output_file: 'index.html'
-          style: 'github'
+      # ------------------------------------
 
       - name: Checkout 'assignment_q_nn' branch into 'assignment_q_nn' folder
         uses: actions/checkout@v4
         with:
-          # This is your other branch
           ref: 'assignment_q_nn' 
-          
-          # This is the sub-folder it will live in on the website
           path: 'assignment_q_nn'         
 
       - name: Setup Pages
@@ -40,8 +35,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload the entire root directory, which now contains
-          # the new index.html and the 'assignment_q_nn' folder
           path: '.' 
 
   deploy:

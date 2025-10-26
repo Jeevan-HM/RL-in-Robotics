@@ -8,6 +8,10 @@
 \usepackage{hyperref}
 \usepackage{booktabs}
 \usepackage{multirow}
+% Prevent awkward word breaks
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+\tolerance=1000
 
 \begin{document}
 
@@ -220,7 +224,7 @@ While our small gridworld might seem toy-like, it captures essential challengesâ
 
 Future work could explore several interesting directions. Double DQN \cite{van2016deep} might reduce overestimation bias. Prioritized experience replay \cite{schaul2015prioritized} could improve sample efficiency. Dueling network architectures \cite{wang2016dueling} might better separate state value from action advantages. Extending to partially observable settings would add another layer of challenge.
 
-The complete implementation, including all code, experiments, and results, is available at: \url{https://github.com/Jeevan-HM/RL-in-Robotics/tree/assignment_q_nn}.
+The complete implementation, including all code, experiments, and results, is available at: \href{https://github.com/Jeevan-HM/RL-in-Robotics/tree/assignment_q_nn}{https://github.com/Jeevan-HM/RL-in-Robotics/tree/assignment\_q\_nn}
 
 \section*{Acknowledgment}
 

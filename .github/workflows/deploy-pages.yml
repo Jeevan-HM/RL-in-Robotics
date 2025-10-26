@@ -15,18 +15,27 @@ jobs:
       - name: Checkout main branch content
         uses: actions/checkout@v4
 
-      # --- THIS IS THE CORRECTED STEP ---
-      - name: Convert README.md to index.html
-        uses: peaceiris/actions-md2html@v1
+      # --- NEW, RELIABLE CONVERSION STEPS ---
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          input_file: 'README.md'
-          output_file: 'index.html'
-      # ------------------------------------
+          python-version: '3.x'
 
-      - name: Checkout 'assignment_q_nn' branch into 'assignment_q_nn' folder
+      - name: Install Markdown converter
+        run: pip install markdown
+
+      - name: Convert README.md to index.html
+        # Uses 'extra' extensions to be more like GitHub's markdown
+        run: python -m markdown -x "extra" README.md > index.html
+      # ----------------------------------------
+
+      - name: Checkout 'assignment_q_nn' branch
         uses: actions/checkout@v4
         with:
+          # This is your other branch
           ref: 'assignment_q_nn' 
+          
+          # This is the sub-folder
           path: 'assignment_q_nn'         
 
       - name: Setup Pages
@@ -35,6 +44,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
+          # Upload the entire directory, including the new index.html
           path: '.' 
 
   deploy:

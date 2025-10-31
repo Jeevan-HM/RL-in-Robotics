@@ -1,0 +1,59 @@
+# This is the full content for: .github/workflows/deploy-pages.yml
+
+name: Deploy Pages with Jekyll
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v4
+        
+      - name: Setup Pages (with Jekyll)
+        uses: actions/configure-pages@v5
+        
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+          
+      # --- THIS IS THE FIX ---
+      - name: Fix _site permissions
+        run: sudo chmod -R 777 ./_site 
+      # ------------------------
+          
+      - name: Checkout 'assignment_q_nn' branch
+        uses: actions/checkout@v4
+        with:
+          ref: 'assignment_q_nn'
+          path: ./_site/assignment_q_nn 
+          
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./_site 
+
+  deploy:
+    needs: build
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+      
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

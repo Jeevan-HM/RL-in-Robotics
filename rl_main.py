@@ -85,7 +85,7 @@ class EnvConfig:
     max_throttle: float = 3.5  # m/s^2 (longitudinal accel)
     max_brake: float = 6.0  # m/s^2 (positive number, applied as decel)
     max_steer: float = 0.6  # radians (~34 degrees)
-    max_steer_rate: float = 1.2  # radians per second
+    max_steer_rate: float = 2.0  # radians per second
     goal_pos: Tuple[float, float] = (8.0, 8.0)
     goal_radius: float = 0.75
 

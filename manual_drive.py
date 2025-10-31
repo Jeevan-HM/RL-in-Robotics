@@ -41,7 +41,7 @@ except Exception as exc:  # pragma: no cover - informative failure
 def manual_drive(config: EnvConfig | None = None) -> None:
     """Launch a simple keyboard-controlled rollout."""
     plt.ion()
-    env = ModularCar2DEnv(config or EnvConfig(vehicle_model="car"))
+    env = ModularCar2DEnv(config or EnvConfig(vehicle_model="car", max_throttle=1.5, max_steer=1.0, max_steer_rate=3.0))
 
     obs, info = env.reset()
     del obs, info  # not used in manual mode

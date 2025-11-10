@@ -10,7 +10,7 @@ from typing import Dict
 
 import numpy as np
 
-from rl_main import EnvConfig, ModularCar2DEnv
+from rl_env import EnvConfig, ModularCar2DEnv
 
 try:
     import matplotlib
@@ -44,7 +44,6 @@ def manual_drive(config: EnvConfig | None = None) -> None:
     env = ModularCar2DEnv(config or EnvConfig(vehicle_model="car", max_throttle=1.5, max_steer=1.0, max_steer_rate=3.0))
 
     obs, info = env.reset()
-    del obs, info  # not used in manual mode
 
     action = np.zeros(2, dtype=np.float32)
     pressed = set()
@@ -59,6 +58,37 @@ def manual_drive(config: EnvConfig | None = None) -> None:
             "Matplotlib did not create a window. "
             "Ensure you are running with a GUI backend (e.g., `python -m pip install pyqt5`)."
         )
+    clearance_text = None
+
+    def draw_clearances(info_dict: Dict[str, float]) -> None:
+        """Overlay wall/obstacle clearance (if available) onto the plot."""
+        nonlocal clearance_text
+        ax = getattr(env, "_ax", None)
+        wall = info_dict.get("wall_clearance")
+        obstacle = info_dict.get("obstacle_clearance")
+        if ax is None or wall is None or obstacle is None:
+            if clearance_text is not None:
+                clearance_text.set_visible(False)
+            return
+        text = f"Wall clr: {wall:5.2f} m\nObs clr: {obstacle:5.2f} m"
+        if clearance_text is None:
+            clearance_text = ax.text(
+                0.02,
+                0.02,
+                text,
+                transform=ax.transAxes,
+                fontsize=10,
+                color="black",
+                bbox=dict(boxstyle="round,pad=0.2", facecolor="white", alpha=0.75),
+                verticalalignment="bottom",
+            )
+        else:
+            clearance_text.set_text(text)
+            clearance_text.set_visible(True)
+        fig.canvas.draw_idle()
+        print(f"Wall clr: {wall:5.2f} m | Obstacle clr: {obstacle:5.2f} m", end="\r", flush=True)
+
+    draw_clearances(info)
 
     key_alias: Dict[str, str] = {
         "left": "left",
@@ -149,15 +179,17 @@ def manual_drive(config: EnvConfig | None = None) -> None:
         while running:
             _, reward, terminated, truncated, info = env.step(action)
             env.render()
+            draw_clearances(info)
 
             if terminated or truncated:
                 reason = info.get("terminated_reason") or ("truncated" if truncated else "terminated")
                 print(f"Episode finished ({reason}). Resetting...")
                 time.sleep(0.75)
-                env.reset()
+                _, info = env.reset()
                 action = np.zeros(2, dtype=np.float32)
                 pressed.clear()
                 env.render()
+                draw_clearances(info)
                 continue
 
             time.sleep(env.cfg.dt)

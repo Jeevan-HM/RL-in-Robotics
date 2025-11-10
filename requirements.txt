@@ -1,0 +1,5 @@
+numpy
+torch
+gymnasium
+matplotlib
+pyqt5  # for interactive rendering backends (QtAgg)

@@ -111,6 +111,7 @@ class EnvConfig:
     #      + K * [obs_i_dx, obs_i_dy, obs_i_r] padded to n_obstacles
     include_applied_accel: bool = True
     include_speed: bool = True
+    include_clearances: bool = True  # append wall/obstacle clearance scalars
     include_heading: bool = True   # appended when vehicle_model == "car"
     include_steering_angle: bool = True  # appended when vehicle_model == "car"
 
@@ -153,6 +154,8 @@ class ModularCar2DEnv(gym.Env):
         base_dim += 2  # goal dx, dy
         if self.cfg.include_speed:
             base_dim += 1
+        if self.cfg.include_clearances:
+            base_dim += 2
         if self._model == "car" and self.cfg.include_heading:
             base_dim += 1
         if self._model == "car" and self.cfg.include_steering_angle:
@@ -223,6 +226,17 @@ class ModularCar2DEnv(gym.Env):
         gx, gy = self.cfg.goal_pos
         return np.hypot(p[0]-gx, p[1]-gy) <= self.cfg.goal_radius
 
+    def _min_clearances(self, px: float, py: float) -> Tuple[float, float]:
+        """Return minimum distances to world bounds and to any obstacle."""
+        half_w = self.world_w / 2.0
+        half_h = self.world_h / 2.0
+        wall_clearance = min(px + half_w, half_w - px, py + half_h, half_h - py)
+
+        obstacle_clearance = max(self.world_w, self.world_h)
+        for (ox, oy, r) in self.obstacles:
+            obstacle_clearance = min(obstacle_clearance, float(np.hypot(px - ox, py - oy) - r))
+        return float(wall_clearance), float(obstacle_clearance)
+
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
         if seed is not None:
             self._np_random = np.random.default_rng(seed)
@@ -275,6 +289,9 @@ class ModularCar2DEnv(gym.Env):
             "applied_accel": self._applied_accel.copy(),
             "terminated_reason": None,
         }
+        wall_clearance, obstacle_clearance = self._min_clearances(px, py)
+        info["wall_clearance"] = wall_clearance
+        info["obstacle_clearance"] = obstacle_clearance
         if self._model == "car":
             info["heading"] = self._heading
             info["steering_angle"] = self._steer
@@ -395,6 +412,9 @@ class ModularCar2DEnv(gym.Env):
             "applied_accel": self._applied_accel.copy(),
             "terminated_reason": "collision" if done_collision else ("goal" if done_goal else ("oob" if done_oob else None)),
         }
+        wall_clearance, obstacle_clearance = self._min_clearances(p[0], p[1])
+        info["wall_clearance"] = wall_clearance
+        info["obstacle_clearance"] = obstacle_clearance
         if self._model == "car":
             info["heading"] = self._heading
             info["steering_angle"] = self._steer
@@ -417,6 +437,9 @@ class ModularCar2DEnv(gym.Env):
                 base += [float(speed_val)]
             else:
                 base += [float(np.hypot(vx, vy))]
+        if self.cfg.include_clearances:
+            wall_clearance, obstacle_clearance = self._min_clearances(px, py)
+            base += [wall_clearance, obstacle_clearance]
         if self._model == "car":
             if self.cfg.include_heading:
                 base += [float(self._heading)]

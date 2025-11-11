@@ -8,7 +8,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from stage1_safety_cac_modularcar import (
+from stage1 import (
     CBFConfig,
     _default_env_cfg,
     train_stage1,

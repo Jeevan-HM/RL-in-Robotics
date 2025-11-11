@@ -8,7 +8,7 @@ from pathlib import Path
 
 import numpy as np
 
-from stage1_safety_cac_modularcar import (
+from stage1 import (
     CBFConfig,
     _default_env_cfg,
     make_stage1_env,

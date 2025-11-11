@@ -10,7 +10,7 @@ from typing import Dict
 
 import numpy as np
 
-from rl_env import EnvConfig, ModularCar2DEnv
+from modularcar_env import EnvConfig, ModularCar2DEnv
 
 try:
     import matplotlib

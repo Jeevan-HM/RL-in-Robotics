@@ -27,9 +27,17 @@ python train_stage1.py \
 ```
 
 Key flags:
-- `--total-steps`: environment interaction budget.
-- `--checkpoint`: output file for the trained weights + optimizer state.
-- Tune `--log-every`, `--start-random-steps`, etc. as needed.
+- `--total-steps` – total number of env steps to collect before stopping.
+- `--checkpoint` – path where the trained policy/critic (plus optimizer state and metadata) is written.
+- `--seed` – random seed for env resets and PyTorch; controls reproducibility.
+- `--start-random-steps` – number of purely random actions before using the policy (helps fill replay buffer).
+- `--update-after` – wait this many steps before the first gradient update so the buffer has data.
+- `--update-every` – how often (in env steps) to run an update block; each block runs `update_every` gradient steps.
+- `--batch-size` – minibatch size sampled from replay for each gradient step.
+- `--gamma` – reward discount factor used by the SAC critic.
+- `--tau` – Polyak averaging rate for the target critics (smaller = slower target updates).
+- `--lr` – learning rate shared by actor, critics, and entropy temperature optimizer.
+- `--log-every` – how many steps between console summaries (avg reward, safe rate, etc.).
 
 ## 2. Evaluate saved agent
 
@@ -44,25 +52,32 @@ python eval_stage1.py \
 ```
 
 Key flags:
-- `--episodes`: number of Monte-Carlo rollouts used for the statistics.
-- `--max-steps`: optional cap per episode (defaults to env config).
-- `--seed` / `--eval-seed`: control environment construction and rollout RNGs.
+- `--checkpoint` – which `.pt` file to load (must match what `train_stage1.py` produced).
+- `--episodes` – number of evaluation rollouts; more episodes = smoother stats but longer runtime.
+- `--gamma` – discount assumed when reporting theoretical Vmax and discounted returns (should match training).
+- `--tau`, `--lr` – optimizer hyperparameters for the temporary `SACAgent` instance (used only if you keep training post‑load; safe to leave at defaults).
+- `--seed` – seed used when creating the wrapped environment (affects obstacle layouts).
+- `--eval-seed` – RNG seed for the evaluation loop; controls which random resets are sampled.
+- `--max-steps` – optional cap on steps per episode (defaults to env.cfg.max_steps when omitted).
 
 ## 3. Visualize / deploy the policy
 
-`deploy_stage1_agent.py` renders the trained agent inside the ModularCar2DEnv, similar to `manual_drive.py`. Requires Matplotlib with an interactive backend (Qt/Tk).
+`deploy_stage1.py` renders the trained agent inside the ModularCar2DEnv, similar to `manual_drive.py`. Requires Matplotlib with an interactive backend (Qt/Tk).
 
 ```bash
-MPLBACKEND=QtAgg python deploy_stage1_agent.py \
+MPLBACKEND=QtAgg python deploy_stage1.py \
   --checkpoint stage1_sac_agent.pt \
   --episodes 3 \
   --sleep-scale 1.0
 ```
 
 Useful flags:
-- `--headless`: skip rendering (quick smoke test).
-- `--sleep-scale`: multiply `env.dt` between frames (<1 speeds up playback).
-- `--max-steps`: stop episodes early if you only want short previews.
+- `--checkpoint` – trained weights to load.
+- `--episodes` – how many episodes to roll out in one run.
+- `--max-steps` – optional upper bound per episode (defaults to env cfg).
+- `--seed` – RNG seed used when drawing maps/reset states during visualization.
+- `--sleep-scale` – scales the pause between frames (`env.dt * sleep_scale`); <1 speeds the video up.
+- `--headless` – skip calls to `env.render()` so you can do a quick textual smoke test (no GUI required).
 
 ## Tips
 

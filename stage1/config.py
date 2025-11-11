@@ -21,7 +21,7 @@ def default_env_config() -> EnvConfig:
     """Return an EnvConfig with safety-related signals enabled."""
     cfg = EnvConfig()
     cfg.sensor_in_obs = True
-    cfg.include_clearances = True
+    cfg.include_clearances = False
     return cfg
 
 

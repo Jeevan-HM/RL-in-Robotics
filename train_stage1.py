@@ -13,6 +13,7 @@ from stage1 import (
     _default_env_cfg,
     train_stage1,
     save_agent,
+    save_actor_critic_weights,
 )
 
 
@@ -29,12 +30,23 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--tau", type=float, default=0.005)
     parser.add_argument("--lr", type=float, default=3e-4)
     parser.add_argument("--log-every", type=int, default=5_000)
+    parser.add_argument(
+        "--stage2-weights",
+        type=Path,
+        default=None,
+        help="Optional path to store actor/critic weights for Stage-2. "
+        "Defaults to '<checkpoint_stem>_stage2.pt' next to the main checkpoint.",
+    )
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
+    stage2_weights_path = args.stage2_weights
+    if stage2_weights_path is None:
+        stage2_weights_path = args.checkpoint.with_name(f"{args.checkpoint.stem}_stage2.pt")
     env_cfg = _default_env_cfg()
+    env_cfg.n_obstacles = 0
     cbf_cfg = CBFConfig(alpha_cbf=5.0, alpha0=0.2, d_safe_point=0.8, d_safe_car=1.0)
 
     agent, out = train_stage1(
@@ -59,7 +71,9 @@ def main():
         "cbf_cfg": cbf_cfg,
     }
     save_agent(agent, args.checkpoint, metadata=metadata)
+    save_actor_critic_weights(agent, stage2_weights_path)
     print(f"\nCheckpoint saved to {args.checkpoint}")
+    print(f"Stage-2 actor/critic weights saved to {stage2_weights_path}")
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ import torch
 
 from .agent import SACAgent
 
-__all__ = ["save_agent", "load_agent"]
+__all__ = ["save_agent", "load_agent", "save_actor_critic_weights"]
 
 
 def _ensure_checkpoint_path(path: str | Path) -> Path:
@@ -40,6 +40,16 @@ def save_agent(agent: SACAgent, path: str | Path, metadata: Optional[Dict[str, A
         "metadata": meta,
     }
     torch.save(checkpoint, _ensure_checkpoint_path(path))
+
+
+def save_actor_critic_weights(agent: SACAgent, path: str | Path):
+    """Persist only the actor/Q-function weights for downstream (Stage-2) use."""
+    payload = {
+        "actor": agent.actor.state_dict(),
+        "q1": agent.q1.state_dict(),
+        "q2": agent.q2.state_dict(),
+    }
+    torch.save(payload, _ensure_checkpoint_path(path))
 
 
 def load_agent(agent: SACAgent, path: str | Path, map_location: Optional[str] = None) -> Optional[Dict[str, Any]]:

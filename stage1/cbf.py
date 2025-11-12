@@ -75,5 +75,5 @@ class SafetyCBF:
         d_clear = float(np.min(comps)) if len(comps) else d_ray
 
         d_safe = self.cfg.d_safe_car if self.env._model == "car" else self.cfg.d_safe_point
-        h_val = float(self.cfg.alpha_cbf * (d_clear - d_safe))
+        h_val = float(self.cfg.alpha_cbf * (d_clear*d_clear - d_safe*d_safe))
         return h_val, {"d_ray": d_ray, "d_clear": d_clear, "d_safe": d_safe}

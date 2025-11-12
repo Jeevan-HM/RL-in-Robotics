@@ -32,6 +32,7 @@ class ModularCar2DEnv(gym.Env):
         self.cfg = config
         self.dt = self.cfg.dt
         self.world_w, self.world_h = self.cfg.world_size
+        self.x_min, self.x_max, self.y_min, self.y_max = self._world_bounds()
         self._model = self.cfg.vehicle_model.lower()
         if self._model not in {"point", "car"}:
             raise ValueError(f"Unsupported vehicle_model '{self.cfg.vehicle_model}'")
@@ -47,7 +48,15 @@ class ModularCar2DEnv(gym.Env):
         self._np_random: np.random.Generator = np.random.default_rng()
         self._state: Optional[VehicleState] = None
         self.state: Optional[np.ndarray] = None  # legacy compatibility
-        self._obstacle_field = ObstacleField(self.cfg, self.world_w, self.world_h)
+        self._obstacle_field = ObstacleField(
+            self.cfg,
+            self.world_w,
+            self.world_h,
+            self.x_min,
+            self.x_max,
+            self.y_min,
+            self.y_max,
+        )
         self.obstacles: List[Tuple[float, float, float]] = self._obstacle_field.obstacles
         self._sensor = RangeSensor(self.cfg)
         self.steps = 0
@@ -86,13 +95,19 @@ class ModularCar2DEnv(gym.Env):
         self.steps += 1
         action = np.asarray(action, dtype=np.float32)
         self._state = self._vehicle_model.step(self._state, action, self.dt)
+        if self.cfg.solid_walls:
+            self._enforce_wall_bounds()
+        hit_obstacle = False
+        if self.cfg.solid_obstacles:
+            hit_obstacle = self._resolve_obstacle_penetration()
         self.state = self._state.as_vector()
 
         if self.cfg.render_agent_trail:
             self._trail.append((float(self._state.position[0]), float(self._state.position[1])))
 
         position = self._state.position
-        done_collision = self._obstacle_field.collides(position)
+        hit_obstacle = self._obstacle_field.collides(position) or hit_obstacle
+        done_collision = hit_obstacle and self.cfg.obstacle_collisions_terminate
         done_oob = self.cfg.out_of_bounds_terminates and (not self._within_bounds(position))
         done_goal = self._goal_reached(position)
         terminated = bool(done_collision or done_goal or done_oob)
@@ -106,7 +121,7 @@ class ModularCar2DEnv(gym.Env):
             - self.cfg.distance_scale * dist
             - self.cfg.control_penalty * control_cost
         )
-        if done_collision:
+        if hit_obstacle:
             reward += self.cfg.r_collision
         if done_goal:
             reward += self.cfg.r_goal
@@ -118,6 +133,58 @@ class ModularCar2DEnv(gym.Env):
     # --------------------------------------------------------------------- #
     # Helpers
     # --------------------------------------------------------------------- #
+    def _enforce_wall_bounds(self):
+        if self._state is None:
+            return
+        px = float(self._state.position[0])
+        py = float(self._state.position[1])
+        clamped_x = float(np.clip(px, self.x_min, self.x_max))
+        clamped_y = float(np.clip(py, self.y_min, self.y_max))
+        if (clamped_x == px) and (clamped_y == py):
+            return
+        self._state.position[0] = clamped_x
+        self._state.position[1] = clamped_y
+
+    def _resolve_obstacle_penetration(self) -> bool:
+        if self._state is None or not self.obstacles:
+            return False
+        collided = False
+        for _ in range(5):
+            adjusted = False
+            px = float(self._state.position[0])
+            py = float(self._state.position[1])
+            for (ox, oy, radius) in self.obstacles:
+                dx = px - ox
+                dy = py - oy
+                dist = float(np.hypot(dx, dy))
+                if dist < radius:
+                    collided = True
+                    if dist <= 1e-6:
+                        normal = np.array([1.0, 0.0], dtype=np.float32)
+                    else:
+                        normal = np.array([dx / dist, dy / dist], dtype=np.float32)
+                    contact = np.array([ox, oy], dtype=np.float32) + normal * radius
+                    self._state.position[:] = contact
+                    vel = self._state.velocity
+                    vn = float(vel[0] * normal[0] + vel[1] * normal[1])
+                    if vn < 0.0:
+                        self._state.velocity[:] = vel - vn * normal
+                    px = float(contact[0])
+                    py = float(contact[1])
+                    adjusted = True
+            if not adjusted:
+                break
+        return collided
+
+    def _world_bounds(self) -> Tuple[float, float, float, float]:
+        if self.cfg.world_origin is not None:
+            x_min = float(self.cfg.world_origin[0])
+            y_min = float(self.cfg.world_origin[1])
+            return x_min, x_min + self.world_w, y_min, y_min + self.world_h
+        half_w = self.world_w / 2.0
+        half_h = self.world_h / 2.0
+        return -half_w, half_w, -half_h, half_h
+
     def _compute_obs_dim(self) -> int:
         base_dim = 4  # px, py, vx, vy
         if self.cfg.include_applied_accel:
@@ -141,9 +208,7 @@ class ModularCar2DEnv(gym.Env):
         self.obstacles = self._obstacle_field.regenerate(self._np_random)
 
     def _within_bounds(self, pos: np.ndarray) -> bool:
-        half_w = self.world_w / 2.0
-        half_h = self.world_h / 2.0
-        return (-half_w <= pos[0] <= half_w) and (-half_h <= pos[1] <= half_h)
+        return (self.x_min <= pos[0] <= self.x_max) and (self.y_min <= pos[1] <= self.y_max)
 
     def _goal_reached(self, pos: np.ndarray) -> bool:
         gx, gy = self.cfg.goal_pos
@@ -241,14 +306,14 @@ class ModularCar2DEnv(gym.Env):
         if self._fig is None:
             self._fig, self._ax = plt.subplots(figsize=(6, 6))
             self._ax.set_aspect("equal", "box")
-            self._ax.set_xlim(-self.world_w / 2, self.world_w / 2)
-            self._ax.set_ylim(-self.world_h / 2, self.world_h / 2)
+            self._ax.set_xlim(self.x_min, self.x_max)
+            self._ax.set_ylim(self.y_min, self.y_max)
             self._ax.set_title("ModularCar2DEnv")
 
         self._ax.clear()
         self._ax.set_aspect("equal", "box")
-        self._ax.set_xlim(-self.world_w / 2, self.world_w / 2)
-        self._ax.set_ylim(-self.world_h / 2, self.world_h / 2)
+        self._ax.set_xlim(self.x_min, self.x_max)
+        self._ax.set_ylim(self.y_min, self.y_max)
         self._ax.grid(True, alpha=0.3)
 
         for (ox, oy, r) in self.obstacles:

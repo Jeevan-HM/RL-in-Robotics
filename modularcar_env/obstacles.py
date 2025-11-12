@@ -15,6 +15,10 @@ class ObstacleField:
     cfg: EnvConfig
     world_w: float
     world_h: float
+    x_min: float
+    x_max: float
+    y_min: float
+    y_max: float
     obstacles: List[Tuple[float, float, float]] = field(default_factory=list)
 
     def regenerate(self, rng: np.random.Generator) -> List[Tuple[float, float, float]]:
@@ -27,8 +31,8 @@ class ObstacleField:
         while len(obs) < self.cfg.n_obstacles and tries < 2000:
             tries += 1
             r = float(rng.uniform(*self.cfg.obstacle_radius_range))
-            x = float(rng.uniform(-self.world_w / 2 + r, self.world_w / 2 - r))
-            y = float(rng.uniform(-self.world_h / 2 + r, self.world_h / 2 - r))
+            x = float(rng.uniform(self.x_min + r, self.x_max - r))
+            y = float(rng.uniform(self.y_min + r, self.y_max - r))
 
             if np.hypot(x - self.cfg.start_pos[0], y - self.cfg.start_pos[1]) < (r + self.cfg.min_obs_goal_margin):
                 continue
@@ -53,9 +57,7 @@ class ObstacleField:
         return False
 
     def min_clearances(self, px: float, py: float) -> Tuple[float, float]:
-        half_w = self.world_w / 2.0
-        half_h = self.world_h / 2.0
-        wall_clearance = min(px + half_w, half_w - px, py + half_h, half_h - py)
+        wall_clearance = min(px - self.x_min, self.x_max - px, py - self.y_min, self.y_max - py)
 
         obstacle_clearance = max(self.world_w, self.world_h)
         for (ox, oy, r) in self.obstacles:

@@ -11,7 +11,8 @@ class EnvConfig:
     """All knobs for the ModularCar2DEnv."""
 
     # World
-    world_size: Tuple[float, float] = (20.0, 20.0)  # width, height (meters)
+    world_size: Tuple[float, float] = (50.0, 50.0)  # width, height (meters)
+    world_origin: Optional[Tuple[float, float]] = None  # if None, frame is centered; else (xmin, ymin)
     dt: float = 0.05  # seconds per step
     max_steps: int = 600
 
@@ -47,7 +48,7 @@ class EnvConfig:
     obstacle_generator: Optional[Callable[[np.random.Generator, "EnvConfig"], List[Tuple[float, float, float]]]] = None
 
     # Rewards
-    r_goal: float = 200.0
+    r_goal: float = 500.0
     r_collision: float = -150.0
     step_penalty: float = -0.1
     control_penalty: float = 0.02  # penalize accel magnitude
@@ -55,6 +56,9 @@ class EnvConfig:
 
     # Termination
     out_of_bounds_terminates: bool = True
+    solid_walls: bool = False  # clamp agent inside walls instead of terminating when enabled
+    obstacle_collisions_terminate: bool = True
+    solid_obstacles: bool = False  # keep agent outside obstacle discs when enabled
 
     # Observation layout
     include_applied_accel: bool = True

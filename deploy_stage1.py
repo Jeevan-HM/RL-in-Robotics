@@ -66,7 +66,6 @@ def run_visualization(args: argparse.Namespace) -> None:
         raise FileNotFoundError(f"Checkpoint '{args.checkpoint}' not found. Run train_stage1.py first.")
 
     env_cfg = _default_env_cfg()
-    env_cfg.n_obstacles = 0
     cbf_cfg = CBFConfig(alpha_cbf=5.0, alpha0=0.2, d_safe_point=0.8, d_safe_car=1.0)
     env, _ = make_stage1_env(env_cfg=env_cfg, cbf_cfg=cbf_cfg, seed=args.seed)
 

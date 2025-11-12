@@ -36,7 +36,6 @@ def parse_args() -> argparse.Namespace:
 def main():
     args = parse_args()
     env_cfg = _default_env_cfg()
-    env_cfg.n_obstacles = 0
     cbf_cfg = CBFConfig(alpha_cbf=5.0, alpha0=0.2, d_safe_point=0.8, d_safe_car=1.0)
     clf_cfg = CLFConfig(beta0=args.beta0)
 

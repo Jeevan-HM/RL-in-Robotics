@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 
-from modularcar_env import EnvConfig
+from realistic_car_env import NavigationConfig
 
 from stage1 import CBFConfig, SafetyCBF, make_stage1_env
 from .agent import Stage2Agent
@@ -41,7 +41,7 @@ def train_stage2(
     alpha_nav: float = 1.0,
     delta_cos: float = 0.05,
     seed: int = 123,
-    env_cfg: Optional[EnvConfig] = None,
+    env_cfg: Optional[NavigationConfig] = None,
     cbf_cfg: Optional[CBFConfig] = None,
     clf_cfg: Optional[CLFConfig] = None,
     log_every: int = 2_000,

@@ -6,8 +6,6 @@ from typing import Optional
 import gymnasium as gym
 import numpy as np
 
-from modularcar_env import ModularCar2DEnv
-
 from .cbf import SafetyCBF
 
 __all__ = ["SafetyRewardWrapper"]
@@ -16,13 +14,17 @@ __all__ = ["SafetyRewardWrapper"]
 class SafetyRewardWrapper(gym.Wrapper):
     """Wraps env to provide Stage-1 safety reward r1 = exp(min(δh, 0))."""
 
-    def __init__(self, env: ModularCar2DEnv, cbf: SafetyCBF):
+    def __init__(self, env: gym.Env, cbf: SafetyCBF):
         super().__init__(env)
         self.cbf = cbf
         self.alpha0 = cbf.cfg.alpha0
         self._prev_obs: Optional[np.ndarray] = None
         self._prev_h: Optional[float] = None
-        self.cfg = env.cfg  # expose wrapped env config
+        # Try to expose wrapped env config if it exists
+        if hasattr(env, 'cfg'):
+            self.cfg = env.cfg
+        elif hasattr(env.unwrapped, 'cfg'):
+            self.cfg = env.unwrapped.cfg
 
     def reset(self, *, seed: Optional[int] = None, options: Optional[dict] = None):
         obs, info = self.env.reset(seed=seed, options=options)

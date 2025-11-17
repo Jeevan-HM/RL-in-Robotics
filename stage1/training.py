@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 
-from modularcar_env import EnvConfig
+from realistic_car_env import NavigationConfig
 
 from .agent import ReplayBuffer, SACAgent
 from .config import CBFConfig
@@ -24,7 +24,7 @@ def train_stage1(
     tau: float = 0.005,
     lr: float = 3e-4,
     seed: int = 42,
-    env_cfg: Optional[EnvConfig] = None,
+    env_cfg: Optional[NavigationConfig] = None,
     cbf_cfg: Optional[CBFConfig] = None,
     log_every: int = 2_000,
 ) -> Tuple[SACAgent, Dict[str, Any]]:

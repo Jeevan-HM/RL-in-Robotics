@@ -3,8 +3,7 @@ from __future__ import annotations
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
-
-from modularcar_env import ModularCar2DEnv
+import gymnasium as gym
 
 from .config import CBFConfig
 
@@ -14,7 +13,7 @@ __all__ = ["SafetyCBF"]
 class SafetyCBF:
     """Computes the discrete-time Control Barrier Function h(s) from env observations."""
 
-    def __init__(self, env: ModularCar2DEnv, cfg: Optional[CBFConfig] = None):
+    def __init__(self, env: gym.Env, cfg: Optional[CBFConfig] = None):
         self.env = env
         self.cfg: CBFConfig = cfg or CBFConfig()
         self._idx = self._compute_index_map()

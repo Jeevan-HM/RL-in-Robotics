@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from modularcar_env import EnvConfig
+from realistic_car_env import NavigationConfig
 
 __all__ = ["CBFConfig", "default_env_config", "_default_env_cfg"]
 
@@ -17,14 +17,11 @@ class CBFConfig:
     d_safe_car: float = 1.0        # safety buffer (meters) for bicycle car model
 
 
-def default_env_config() -> EnvConfig:
-    """Return an EnvConfig with safety-related signals enabled."""
-    cfg = EnvConfig(world_origin=(0.0, 0.0), start_pos=(2.0, 2.0), goal_pos=(48.0, 48.0), solid_walls=True, obstacle_collisions_terminate=False, solid_obstacles=True,n_obstacles=6)
-    cfg.sensor_in_obs = True
-    cfg.include_clearances = False
-    return cfg
+def default_env_config() -> NavigationConfig:
+    """Return a NavigationConfig with safety-related settings."""
+    return NavigationConfig()
 
 
 # Legacy alias so existing imports keep working.
-def _default_env_cfg() -> EnvConfig:
+def _default_env_cfg() -> NavigationConfig:
     return default_env_config()

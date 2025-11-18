@@ -22,7 +22,7 @@ def visualize_with_moving_obstacles(
     checkpoint_path: str = "checkpoints/responsive_stage2.pt",
     num_episodes: int = 3,
     num_moving_obstacles: int = 3,
-    obstacle_speed: float = 3.0,  # m/s
+    obstacle_speed: float = 5.0,  # m/s
 ):
     """
     Visualize agent dodging moving obstacles.
@@ -63,7 +63,7 @@ def visualize_with_moving_obstacles(
         max_steering_rate=90.0 * np.pi / 180,
         max_engine_force=8000.0,
         max_brake_force=12000.0,
-        max_speed=25.0,
+        max_speed=15.0,
         lidar_range=25.0,
         num_lidar_rays=num_lidar_rays,
         length=4.5,

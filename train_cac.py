@@ -632,10 +632,16 @@ def main():
         help="Training stage (1: safety critic, 2: restricted policy). If not specified, runs both.",
     )
     parser.add_argument(
-        "--steps-stage1", type=int, default=500_000, help="Training steps for Stage 1"
+        "--steps-stage1",
+        type=int,
+        default=10_000_000,
+        help="Training steps for Stage 1",
     )
     parser.add_argument(
-        "--steps-stage2", type=int, default=500_000, help="Training steps for Stage 2"
+        "--steps-stage2",
+        type=int,
+        default=10_000_000,
+        help="Training steps for Stage 2",
     )
     parser.add_argument(
         "--checkpoint-dir",

@@ -1,2 +1,64 @@
-.venv  
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+
+# Model checkpoints backups
+*.pt.bak
+*.pth.bak
+
+# ML/RL Training artifacts
+wandb/
+runs/
+tensorboard_logs/
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Lock files (optional - uncomment if needed)
+# uv.lock

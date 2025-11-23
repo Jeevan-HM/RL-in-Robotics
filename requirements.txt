@@ -1,0 +1,14 @@
+# RL in Robotics - Requirements
+# =============================
+
+# Core dependencies
+numpy>=1.20.0
+torch>=2.0.0  # Required for MPS (Apple Metal) support
+gymnasium>=0.28.0
+matplotlib>=3.5.0
+
+# GUI backend for visualization
+pyqt5>=5.15.0
+
+# Optional: For better performance
+# torchvision>=0.15.0  # If using image-based observations in future

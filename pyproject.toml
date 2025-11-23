@@ -1,10 +1,13 @@
 [project]
 name = "rl-in-robotics"
 version = "0.1.0"
-description = "Add your description here"
+description = "Certificated Actor-Critic (CAC) for Safe Robot Navigation - Hierarchical RL with Control Barrier Functions"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
+    "gymnasium>=1.2.2",
     "matplotlib>=3.10.6",
-    "numpy>=2.3.3",
+    "numpy>=2.2.6",
+    "pyqt5>=5.15.11",
+    "torch>=2.0.0",
 ]
